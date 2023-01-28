@@ -80,6 +80,18 @@ public class _3_ExpiryDateCalculatorTest {
         assertExpiryDate(payData3, LocalDate.of(2019, 7, 31));
     }
 
+    @Test
+    void 이만원_이상_납부하면_비례해서_만료일_계산() {
+        // 2만 원을 지불하면 만료일이 두 달 뒤가 된다
+        // 3만 원을 지불하면 만료일이 석 달 뒤가 된다
+        assertExpiryDate(
+            PayData.builder()
+                .billingDate(LocalDate.of(2019,3,1))
+                .payAmount(20_000)
+                .build(),
+            LocalDate.of(2019,5,1));
+    }
+
     private static void assertExpiryDate(PayData payData, LocalDate expectedExpiryDate) {
         ExpiryDateCalculator cal = new ExpiryDateCalculator();
         LocalDate expiryDate = cal.calculateExpiryDate(payData);
