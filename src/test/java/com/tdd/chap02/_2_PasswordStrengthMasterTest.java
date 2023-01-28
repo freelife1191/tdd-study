@@ -43,4 +43,9 @@ public class _2_PasswordStrengthMasterTest {
     void nullInput_Then_Invalid() {
         assertStrength(null, PasswordStrength.INVALID);
     }
+
+    @Test
+    void emptyInput_Then_Invalid() {
+        assertStrength("", PasswordStrength.INVALID);
+    }
 }
