@@ -58,4 +58,9 @@ public class _2_PasswordStrengthMasterTest {
     void meetsOnlyLengthCriteria_Then_Week() {
         assertStrength("abdefghi", PasswordStrength.WEAK);
     }
+
+    @Test
+    void meetsOnlyNumCriteria_Then_Weak() {
+        assertStrength("1234", PasswordStrength.WEAK);
+    }
 }
