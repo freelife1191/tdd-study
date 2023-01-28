@@ -17,8 +17,11 @@ public class ExpiryDateCalculator {
                     return candidateExp.withDayOfMonth(dayLenOfCandiMon);
                 }
                 return candidateExp.withDayOfMonth(dayOfFirstBilling);
+            } else {
+                return candidateExp;
             }
+        } else {
+            return payData.getBillingDate().plusMonths(addedMonths);
         }
-        return payData.getBillingDate().plusMonths(addedMonths);
     }
 }
