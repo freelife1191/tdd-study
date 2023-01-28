@@ -7,7 +7,7 @@ public class PasswordStrengthMeter {
         if (s.length() >= 8) metConunts++;
         if (meetsContainningNumberCriteria(s)) metConunts++;
         if (meetsContainingUppercaseCriteria(s)) metConunts++;
-        if (metConunts == 1) return PasswordStrength.WEAK;
+        if (metConunts <= 1) return PasswordStrength.WEAK;
         if (metConunts == 2) return PasswordStrength.NORMAL;
         return PasswordStrength.STRONG;
     }
