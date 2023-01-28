@@ -119,6 +119,7 @@ public class _3_ExpiryDateCalculatorTest {
 
    @Test
    void 십만원을_납부하면_1년_제공() {
+        // 10만원 납부하면 1년 서비스를 제공하는 테스트 사례 추가
        assertExpiryDate(
            PayData.builder()
                .billingDate(LocalDate.of(2019,1,28))
