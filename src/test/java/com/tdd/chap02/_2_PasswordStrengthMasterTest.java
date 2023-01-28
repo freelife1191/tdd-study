@@ -53,4 +53,9 @@ public class _2_PasswordStrengthMasterTest {
     void meetsOtherCriteria_except_for_Uppercase_Then_Normal() {
         assertStrength("ab12!@df", PasswordStrength.NORMAL);
     }
+
+    @Test
+    void meetsOnlyLengthCriteria_Then_Week() {
+        assertStrength("abdefghi", PasswordStrength.WEAK);
+    }
 }
