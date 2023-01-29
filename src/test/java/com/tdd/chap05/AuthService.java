@@ -1,4 +1,4 @@
-package com.tdd.chap04;
+package com.tdd.chap05;
 
 public class AuthService {
     public void authenticate(String id, String pw) {
