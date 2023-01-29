@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * 2개월 이상 요금을 납부할 수 있다
  * 10만 원을 납부하면 서비스를 1년 제공한다
  */
-public class _3_ExpiryDateCalculatorTest {
+public class _1_ExpiryDateCalculatorTest {
 
     @Test
     void 만원_납부하면_한달_뒤가_만료일이_됨() {
