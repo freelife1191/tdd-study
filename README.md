@@ -435,3 +435,32 @@ void 첫_납부일과_만료일_일자가_다를때_이만원_이상_납부() {
 
 > 복잡한 로직을 구현해야 하는 것은 결국 개발자이므로 개발자는 최대한 예외적인 상황이나 복잡한 상황에 해당하는 구체적인 예를 끄집어내야 한다.  
 > 이를 위한 가장 좋은 방법은 담당자와 대화를 하는 것이다. 대화 과정이 쉽지 않을 때도 있지만 대화를 하지 않으면 올바르게 원하는 결과물을 개발하지 못한다.
+
+---
+
+## Chapter 5. Junit 5 기초
+
+Junit 5는 크게 세 개의 요소로 구성되어 있음
+
+- JUnit 플랫폼: 테스팅 프레임워크를 구동하기 위한 런처와 테스트 엔진을 위한 API를 제공
+- JUnit 주피터(Jupiter): JUnit 5를 위한 테스트 API와 실행 엔진을 제공
+- JUnit 빈티지(Vintage): JUnit 3과 4로 작성된 테스트를 JUnit 5 플랫폼에서 실행하기 위한 모듈을 제공한다
+
+### `@Test` 애노테이션과 테스트 메서드
+
+Assertions 클래스가 제공하는 주요 단언 메서드
+
+| 메서드                                            | 설명                                                         |
+| ------------------------------------------------- | ------------------------------------------------------------ |
+| `assertEquals(expected, actual)`                  | 실제 값(actual)이 기대하는 값(expected)과 같은지 검사한다    |
+| `assertNotEquals(unexpected, actual)`             | 실제 값(actual)이 특정 값(unexpected)과 같지 않은지 검사한다 |
+| `assertSame(Object expected, Object actual)`      | 두 객체가 동일한 객체인지 검사한다                           |
+| `assertNotSame(Object unexpected, Object actual)` | 두 객체가 동일하지 않은 객체인지 검사한다                    |
+| `assertTrue(boolean condition)`                   | 값이 true인지 검사한다                                       |
+| `assertFalse(boolean condition)`                  | 값이 false인지 검사한다                                      |
+| `assertNull(Object actual)`                       | 값이 null인지 검사한다                                       |
+| `assertNotNull(Object actual)`                    | 값이 null이 아닌지 검사한다                                  |
+| `fail()`                                          | 테스트를 실패 처리한다                                       |
+
+
+
