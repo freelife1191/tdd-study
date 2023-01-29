@@ -469,3 +469,12 @@ Assertions가 제공하는 익셉션 발생 유무 검사 메서드
 | `assertThrows(Class<T> expectedType, Executable executable)` | executable을 실행한 결과로 지정한 타입의 익셉션이 발생하는지 검사한다 |
 | `assertDoesNotThrow(Executable executable)`                  | executable을 실행한 결과로 익셉션이 발생하지 않는지 검사한다 |
 
+참고로 `assertThrows()`와 `assertDoesNotThrow()` 메서드에서 사용하는 Executable 인터페이스는 다음과 같이 `execute()` 메서드를 가진 함수형 인터페이스이다
+
+```java
+package org.junit.jupiter.api.function;
+
+public interface Executable {
+    void execute() throws Throwable;
+}
+```
