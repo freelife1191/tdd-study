@@ -462,5 +462,10 @@ Assertions 클래스가 제공하는 주요 단언 메서드
 | `assertNotNull(Object actual)`                    | 값이 null이 아닌지 검사한다                                  |
 | `fail()`                                          | 테스트를 실패 처리한다                                       |
 
+Assertions가 제공하는 익셉션 발생 유무 검사 메서드
 
+| 메서드                                                       | 설명                                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `assertThrows(Class<T> expectedType, Executable executable)` | executable을 실행한 결과로 지정한 타입의 익셉션이 발생하는지 검사한다 |
+| `assertDoesNotThrow(Executable executable)`                  | executable을 실행한 결과로 익셉션이 발생하지 않는지 검사한다 |
 
