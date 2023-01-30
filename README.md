@@ -446,7 +446,7 @@ Junit 5는 크게 세 개의 요소로 구성되어 있음
 - JUnit 주피터(Jupiter): JUnit 5를 위한 테스트 API와 실행 엔진을 제공
 - JUnit 빈티지(Vintage): JUnit 3과 4로 작성된 테스트를 JUnit 5 플랫폼에서 실행하기 위한 모듈을 제공한다
 
-### `@Test` 애노테이션과 테스트 메서드
+### 주요 단언 메서드
 
 Assertions 클래스가 제공하는 주요 단언 메서드
 
@@ -478,3 +478,58 @@ public interface Executable {
     void execute() throws Throwable;
 }
 ```
+
+### 테스트 라이프 사이클
+
+#### `@BeforeEach` 애노테이션과 `@AfterEach` 애노테이션
+JUnit은 각 테스트 메서드마다 다음 순서대로 코드를 실행한다
+
+1. 테스트 메서드를 포함한 객체 생성
+2. (존재하면) `@BeforeEach` 애노테이션이 붙은 메서드 실행
+3. `@Test` 애노테이션이 붙은 메서드 실행
+4. (존재하면) `@AfterEach` 애노테이션이 붙은 메서드 실행
+
+#### `@BeforeAll` 애노테이션과 `@AfterAll` 애노테이션
+- `@BeforeAll`: 한 클래스의 모든 테스트 메서드가 실행되기 전에 특정 작업을 수행해야 할 때 사용
+  - 정적 메서드에 붙여야되며 클래스의 모든 테스트 메서드를 실행하기 전에 한 번 실행된다
+- `@AfterAll`: 반대로 클래스의 모든 테스트 메서드를 실행한 뒤에 실행된다
+  - 이 메서드 역시 정적 메서드에 적용
+
+### 테스트 메서드 간 실행 순서 의존과 필드 공유하지 않기
+```java
+public class BadTest {
+    private FileOperator op = new FileOperator();
+    private static File file; // 두 테스트가 데이터를 공유할 목적으로 필드 사용
+    
+    @Test
+    void fileCreationTest() {
+        File createdFile = op.createFile();
+        assertTrue(createdFile.length() > 0);
+        this.file = createdFile;
+    }
+    
+    @Test
+    void readFileTest() {
+        long data = op.readData(file);
+        assertTrue(data > 0);
+    }
+}
+```
+
+각 테스트 메서드는 서로 독립적으로 동작해야 한다. 한 테스트 메서드의 결과에 따라 다른 테스트 메서드의 실행 결과가 달라지면 안 된다.  
+그런 의미에서 테스트 메서드가 서로 필드를 공유한다거나 실행 순서를 가정하고 테스트를 작성하지 말아야 한다.
+
+### 추가 애노테이션: `@DisplayName`, `@Disabled`
+- `@DisplayName`: 테스트에 표시 이름을 붙일 수 있음
+- `@Disabled`: 특정 테스트를 실행하지 않고 싶을 때 사용
+
+### 모든 테스트 실행하기
+- mvn test (래퍼를 사용하는 경우 mvnw test)
+- gradle test (래퍼를 사용하는 경우 gradlew test)
+
+아래의 명령어를 실행하면 라이프사이클에 의해 테스트가 먼저 수행된다
+
+- mvn package
+- gradle build
+
+인텔리J나 이클립스에서 `src/test/java` 폴더에서 테스트를 실행
