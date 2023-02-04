@@ -3,6 +3,8 @@ package com.tdd.chap06;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 /**
  * - 파일에서 숫자를 읽어와 숫자의 합을 구한다
  * - 한 줄마다 한 개의 숫자를 포함한다
@@ -40,5 +42,11 @@ public class _1_BaseballGameTest {
         // 결과 확인
         assertEquals(1, score.strikes());
         assertEquals(2, score.balls());
+    }
+
+    @Test
+    void genGame_With_DupNumber_Then_Fail() {
+        assertThrows(IllegalArgumentException.class,
+            () -> new BaseballGame("110"));
     }
 }

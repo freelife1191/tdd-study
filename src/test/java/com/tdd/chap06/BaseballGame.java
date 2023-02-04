@@ -6,17 +6,19 @@ class BaseballGame {
     private final int[] answer;
 
     public BaseballGame(String answer) {
-        this.answer = getDiff(answer);
+        this.answer = toIntArray(answer);
     }
 
     public Score guess(String solution) {
-        return getScore(getDiff(solution));
+        return getScore(toIntArray(solution));
     }
 
-    private static int[] getDiff(String solution) {
-        return Arrays.stream(solution.split(""))
+    private static int[] toIntArray(String str) {
+        int[] intArray = Arrays.stream(str.split(""))
             .mapToInt(Integer::parseInt)
             .toArray();
+        validationCheck(intArray);
+        return intArray;
     }
 
     private Score getScore(int[] diff) {
@@ -29,5 +31,14 @@ class BaseballGame {
             if (Arrays.stream(this.answer).filter(num -> answerValue != diffValue).anyMatch(num -> num == diffValue)) balls++;
         }
         return new Score(strikes, balls);
+    }
+
+    private static void validationCheck(int[] numbers) {
+        for (int i = 0; i < numbers.length; i++) {
+            for (int j = i+1; j < numbers.length; j++) {
+                if (numbers[i] == numbers[j])
+                    throw new IllegalArgumentException("not allowed duplicate number");
+            }
+        }
     }
 }
