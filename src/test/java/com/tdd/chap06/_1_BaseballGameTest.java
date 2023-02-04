@@ -22,22 +22,42 @@ public class _1_BaseballGameTest {
         assertEquals(0, score.balls());
     }
 
+    @Test
+    void noMatch() {
+        // 정답이 123인 상황
+        BaseballGame game = new BaseballGame("123");
+        // 실행
+        Score score = game.guess("456");
+        // 결과 확인
+        assertEquals(0, score.strikes());
+        assertEquals(0, score.balls());
+    }
+
     private static class BaseballGame {
         private final int[] answer;
         public BaseballGame(String answer) {
-            this.answer = Arrays.stream(answer.split(""))
+            this.answer = getDiff(answer);
+        }
+
+        public Score guess(String solution) {
+            return getScore(getDiff(solution));
+        }
+
+        private static int[] getDiff(String solution) {
+            return Arrays.stream(solution.split(""))
                 .mapToInt(Integer::parseInt)
                 .toArray();
         }
 
-        public Score guess(String solution) {
-            int[] diff = Arrays.stream(solution.split(""))
-                .mapToInt(Integer::parseInt)
-                .toArray();
-            if (Arrays.equals(this.answer, diff)) {
-                return new Score(3, 0);
+        private Score getScore(int[] diff) {
+            int strikes = 0;
+            int balls = 0;
+            for (int i = 0; i < this.answer.length ; i++) {
+                int diffValue = diff[i];
+                if (this.answer[i] == diffValue) strikes++;
+                if (Arrays.stream(this.answer).anyMatch(num -> num == diffValue)) balls++;
             }
-            return new Score(0, 0);
+            return new Score(strikes, balls);
         }
     }
 
