@@ -27,7 +27,6 @@ class BaseballGame {
             int answerValue = this.answer[i];
             if (answerValue == diffValue) strikes++;
             if (Arrays.stream(this.answer).filter(num -> answerValue != diffValue).anyMatch(num -> num == diffValue)) balls++;
-            System.out.println(answer[i]+" : "+diffValue+", strikes="+strikes+", balls="+balls);
         }
         return new Score(strikes, balls);
     }
