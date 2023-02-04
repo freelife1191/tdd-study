@@ -5,12 +5,20 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * 외부 상황과 외부 결과
  */
 public class _2_MathUtilsTest {
+
+    @Test
+    void dataFileSumTest() {
+        File dataFile = new File("src/test/resources/datafile.txt");
+        long sum = MathUtils.sum(dataFile);
+        assertEquals(10L, sum);
+    }
 
     @DisplayName("파일이 존재하지 않으면 IllegalArgumentException 발생")
     @Test
