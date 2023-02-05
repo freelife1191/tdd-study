@@ -709,3 +709,44 @@ void alreadyRegistered_InfoUpdated() {
     assertEquals("123456789012", saved.getCardNumber());
 }
 ```
+
+### 대역의 종류
+
+|  대역 종류  | 설명                                                         |
+| :---------: | ------------------------------------------------------------ |
+| 스텁(Stub)  | 구현을 단순한 것으로 대체한다. 테스트에 맞게 단순히 원하는 동작을 수행한다. </br>StubCardNumberValidator가 스텁 대역에 해당한다. |
+| 가짜(Fake)  | 제품에는 적합하지 않지만, 실제 동작하는 구현을 제공한다. </br>DB 대신에 메모리를 이용해서 구현한 MemoryAutoDebitInfoRepository가 가짜 대역에 해당한다. |
+| 스파이(Spy) | 호출된 내역을 기록한다. 기록한 내용은 테스트 결과를 검증할 때 사용한다. 스텁이기도 하다. |
+| 모의(Mock)  | 기대한 대로 상호작용하는지 행위를 검증한다. 기대한 대로 동작하지 않으면 익셉션을 발생할 수 있다.</br>모의 객체는 스텁이자 스파이도 된다. |
+
+회원 가입 기능을 구현
+
+```mermaid
+---
+title: UserRegister와 의존 대상
+---
+classDiagram
+    class UserRegister
+    class EmailNotifier {
+        <<interface>>
+    }
+    class WeakPasswordChecker {
+        <<interface>>
+    }
+    class UserRepository {
+        <<interface>>
+    }
+    direction TB
+    UserRegister ..> WeakPasswordChecker
+    UserRegister ..> EmailNotifier
+    UserRegister ..> UserRepository
+```
+
+- UserRegister: 회원 가입에 대한 핵심 로직을 수행한다
+- WeakPasswordChecker: 암호가 약한지 검사한다
+- UserRepository: 회원 정보를 저장하고 조회하는 기능을 제공한다
+- EmailNotifier: 이메일 발송 기능을 제공한다
+
+> 구현하기 전에 모든 기능을 설계하는 것은 불가능하다. 왜냐면 개발을 진행하는동안에도 요구사항이 계속 바뀌기 때문이다.  
+> 그럼에도 불구하고 단위 기능을 구현하기에 앞서 어떤 구성 요소가 필요할지 고민하는 것은 의존 대상을 도출할 때 도움이 된다.  
+> 구현하다 보면 설계한 것과 다른 의존 대상이 출현하기도 필요할 거라 생각했던 의존 대상이 사라지기도 한다.
