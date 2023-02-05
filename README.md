@@ -755,3 +755,128 @@ classDiagram
 > TDD에서 속도 조절은 중요하다.  
 > 상수를 이용해서 테스트를 통과시킨 다음에 구현을 일반화할 방법이 떠오르지 않으면 예를 추가하면서 점진적으로 구현을 완성해 나가면 된다.
 
+### 상황과 결과 확인을 위한 협업 대상(의존) 도출과 대역 사용
+
+한 테스트는 특정한 상황에서 기능을 실행하고 그 결과를 확인한다
+자동이체 정보 등록 예에서 `autoDebitRegister.register()` 메서드 내부에서   
+직접 RestTemplate과 같은 클라이언트를 이용해서 외부의 카드 정보 API를 직접 연동한다면 테스트 코드에서   
+유효하지 않은 카드번호를 위한 상황을 구성하기가 힘들다
+
+```java
+@Test
+void invalidCardNumber() {
+    // 상황: 유효하지 않은 카드번호
+    실제로 카드 정보 API를 연동하면 테스트 코드에서 상황을 제어할 수 없음
+    
+    // 실행
+    AutoDebitReq req = new AutoDebitReq("user1", 카드번호필요);
+    RegisterResult result = register.register(req);
+    
+    // 결과 확인
+    assertEquals(VALID, result.getValidity());
+}
+```
+
+이렇게 제어하기 힘든 외부 상황이 존재하면 다음과 같은 방법으로 의존을 도출하고 이를 대역으로 대신함
+
+- 제어하기 힘든 외부 상황을 별도 타입으로 분리
+- 테스트 코드는 별도로 분리한 타입의 대역을 생성
+- 생성한 대역을 테스트 대상의 생성자등을 이용해서 전달
+- 대역을 이용해서 상황 구성
+
+카드번호가 유효한지 검사하는 기능을 별도 타입으로 분리하고 이를 이용해서 대역을 생성
+
+```java
+private AutoDebitRegister register = new AutoDebitRegister();
+
+@Test
+void invalidCardNumber() {
+    // 상황: 유효하지 않은 카드번호
+    실제로 카드 정보 API를 연동하면 테스트 코드에서 상황을 제어할 수 없음
+        
+    AutoDebitReq req = new AutoDebitReq("user1", 카드번호필요);
+    RegisterResult result = register.register(req);
+    assertEquals(VALID, result.getValidity());
+}
+```
+
+테스트 코드에서 상황을 제어하기 힘들면 별도 타입으로 분리하고 대역 사용 검토
+
+```java
+private StubCardValidator stubValidator = new StubCardValidator();
+private AutoDebitRegister register = new AutoDebitRegister();
+        
+@Test
+void invalidCardNumber() {
+    stubValidator.setInvalidNo("11223344")
+        
+    AutoDebitReq req = new AutoDebitReq("user1", "11223344");
+    RegisterResult result = register.register(req);
+    
+    assertEquals(VALID, result.getValidity());
+}
+```
+상황 구성을 위해 카드번호 검사 기능을 별도 타입으로 분리
+
+결과 확인을 위해서도 의존을 도출할 수 있음
+
+회원 가입에 성공한 경우 이메일을 발송하는 기능을 테스트하기 위해 회원 가입 기능 실행 이후에 이메일 발송 여부를 확인할 수단이 필요하다  
+
+```java
+@DisplayName("가입하면 메일을 전송함")
+@Test
+void whenRegisterThenSendMail() {
+    userRegister.register("id", "pw", "email@email.com");
+
+    // 이메일 발송 여부를 확인할 방법 필요
+}
+```
+
+이메일 발송 자체를 UserRegister에서 구현하면 테스트 코드에서 발송 여부를 확인하기 어려움  
+결과 확인과 관련된 기능을 별도 타입으로 분리하고 이를 대역으로 대체하면 됨
+
+
+```java
+private SpyEmailNotifier spyEmailNotifier = new SpyEmailNotifier();
+
+@BeforeEach
+void setUp() {
+    userRegister = new UserRegister(stubPasswordChecker, fakeRepository, spyEmailNotifier);
+}
+
+@DisplayName("가입하면 메일을 전송함")
+@Test
+void whenRegisterThenSendMail() {
+    userRegister.register("id", "pw", "email@email.com");
+        
+    // 결과 확인을 위해 대역을 이용
+    assertTrue(spyEmailNotifier.isCalled());
+    assertEquals(
+        "email@email.com",
+        spyEmailNotifier.getEmail());
+}
+```
+
+당장 구현하는 데 시간이 오래 걸리는 로직도 분리하기 좋은 후보이다  
+구현에 시간이 걸리는 로직을 별도 타입으로 분리하면 지금 당장 로직을 구현하지 않아도 관련 테스트를 통과시킬 수 있다  
+
+
+암호가 약한지 여부를 직접 구현한다고 하면 테스트 코드는 다양한 예를 추가하면서 약한 암호인지 확인하는 코드를 점진적으로 완성해야 한다
+
+```java
+@DisplayName("약한 암호면 가입 실패")
+@Test
+void weakPassword() {
+    assertThrows(WeakPasswordException.class, () -> {
+        userRegister.register("id", "pw", "email");
+    });
+
+    assertThrows(WeakPasswordException.class, () -> {
+        userRegister.register("id", "pw3", "email");
+    });
+    ...약한 암호 예를 추가하면서 기능 구현
+}
+```
+
+암호 검사하는 기능을 협업 대상으로 분리하면 스텁이나 모의 객체 등의 대역을 이용해서  
+약한 암호에 대한 상황을 쉽게 구성할 수 있으므로 테스트를 원활하게 진행할 수 있게 된다
