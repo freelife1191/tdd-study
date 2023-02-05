@@ -17,6 +17,8 @@ public class SpyEmailNotifier implements EmailNotifier {
 
     @Override
     public void sendRegisterEmail(String email) {
+        // 테스트를 통과시키기 위한 처리
         this.called = true;
+        this.email = email;
     }
 }

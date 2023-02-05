@@ -3,10 +3,12 @@ package com.tdd.chap07.user;
 public class UserRegister {
     private WeakPasswordChecker passwordChecker;
     private UserRepository userRepository;
+    private EmailNotifier emailNotifier;
 
-    public UserRegister(WeakPasswordChecker passwordChecker, UserRepository userRepository, SpyEmailNotifier spyEmailNotifier) {
+    public UserRegister(WeakPasswordChecker passwordChecker, UserRepository userRepository, EmailNotifier emailNotifier) {
         this.passwordChecker = passwordChecker;
         this.userRepository = userRepository;
+        this.emailNotifier = emailNotifier;
     }
 
     public void register(String id, String pw, String email) {
@@ -20,5 +22,7 @@ public class UserRegister {
         }
         // 생성한 User 객체를 리포지토리에 저장해서 테스트 통과
         userRepository.save(new User(id, pw, email));
+        // EmailNotifier의 이메일 발송 기능을 호출
+        emailNotifier.sendRegisterEmail(email);
     }
 }
