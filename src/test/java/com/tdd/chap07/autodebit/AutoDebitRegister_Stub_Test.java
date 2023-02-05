@@ -24,7 +24,7 @@ public class AutoDebitRegister_Stub_Test {
 
     @Test
     void invalidCard() {
-        // 테스트에서 통과시킬 카드변호를 셋팅
+        // 유효하지 않은 카드 번호 상황 흉내
         stubValidator.setInvalidNo("111122223333");
 
         AutoDebitReq req = new AutoDebitReq("user1", "111122223333");
@@ -35,7 +35,7 @@ public class AutoDebitRegister_Stub_Test {
 
     @Test
     void theftCard() {
-        // 테스트에서 통과시킬 카드변호를 셋팅
+        // 도난카드 번호 상황 흉내
         stubValidator.setTheftNo("1234567890123456");
 
         AutoDebitReq req = new AutoDebitReq("user1", "1234567890123456");

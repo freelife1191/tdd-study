@@ -6,6 +6,7 @@ package com.tdd.chap07.autodebit;
  */
 public class StubCardNumberValidator extends CardNumberValidator {
     private String invalidNo;
+    // 도난 카드번호를 위한 코드를 추가
     private String theftNo;
 
     public void setInvalidNo(String invalidNo) {
