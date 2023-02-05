@@ -7,6 +7,7 @@ public class StubWeakPasswordChecker implements WeakPasswordChecker {
         this.weak = weak;
     }
 
+    // StubWeakPasswordChecker가 대역으로 동작할 수 있게 구현 추가
     @Override
     public boolean checkPasswordWeak(String pw) {
         return weak;

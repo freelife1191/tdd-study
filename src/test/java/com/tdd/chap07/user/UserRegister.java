@@ -8,6 +8,8 @@ public class UserRegister {
     }
 
     public void register(String id, String pw, String email) {
-        throw new WeakPasswordException();
+        if (passwordChecker.checkPasswordWeak(pw)) {
+            throw new WeakPasswordException();
+        }
     }
 }
