@@ -13,10 +13,11 @@ public class UserRegisterTest {
     private UserRegister userRegister;
     private StubWeakPasswordChecker stubPasswordChecker = new StubWeakPasswordChecker();
     private MemoryUserRepository fakeRepository = new MemoryUserRepository();
+    private SpyEmailNotifier spyEmailNotifier = new SpyEmailNotifier();
 
     @BeforeEach
     void setUp() {
-        userRegister = new UserRegister(stubPasswordChecker, fakeRepository);
+        userRegister = new UserRegister(stubPasswordChecker, fakeRepository, spyEmailNotifier);
     }
 
     /**
@@ -51,5 +52,19 @@ public class UserRegisterTest {
         User savedUser = fakeRepository.findById("id"); // 가입 결과 확인
         assertEquals("id", savedUser.getId());
         assertEquals("email", savedUser.getEmail());
+    }
+
+    /**
+     * 스파이 대역을 이용해서 메일 전송 여부를 확인하는 테스트 코드
+     */
+    @DisplayName("가입하면 메일을 전송함")
+    @Test
+    void whenRegisterThenSendMail() {
+        userRegister.register("id", "pw", "email@email.com");
+
+        assertTrue(spyEmailNotifier.isCalled());
+        assertEquals(
+            "email@email.com",
+            spyEmailNotifier.getEmail());
     }
 }

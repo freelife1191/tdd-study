@@ -4,7 +4,7 @@ public class UserRegister {
     private WeakPasswordChecker passwordChecker;
     private UserRepository userRepository;
 
-    public UserRegister(WeakPasswordChecker passwordChecker, UserRepository userRepository) {
+    public UserRegister(WeakPasswordChecker passwordChecker, UserRepository userRepository, SpyEmailNotifier spyEmailNotifier) {
         this.passwordChecker = passwordChecker;
         this.userRepository = userRepository;
     }
