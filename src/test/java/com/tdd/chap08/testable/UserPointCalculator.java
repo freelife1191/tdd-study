@@ -10,17 +10,23 @@ import com.tdd.chap08.subs.User;
 import java.time.LocalDate;
 
 /**
- * [실행 시점에 따라 달라지는 결과]
- * 기능 구현이 섞여 있어 특정한 부분만 테스트하기 어려운 코드
+ * 포인트 계산 기능 자체를 대역으로 변경하고 싶다면 '의존 대상을 주입 받기'에서 설명한 것 처럼
+ * 세터를 이용해서 의존 대상을 주입
  */
 public class UserPointCalculator {
+    private PointRule pointRule = new PointRule(); // 기본 구현을 사용
     private SubscriptionDao subscriptionDao;
     private ProductDao productDao;
 
-    public UserPointCalculator(SubscriptionDao subscriptionDao,
-                               ProductDao productDao) {
+    public UserPointCalculator(SubscriptionDao subscriptionDao, ProductDao productDao) {
         this.subscriptionDao = subscriptionDao;
         this.productDao = productDao;
+    }
+
+    // 별도로 분리한 계산 기능을 주입할 수 있는 세터 추가
+    // 테스트 코드에서 대역으로 계산 기능을 대체할 수 있게 함
+    public void setPointRule(PointRule pointRule) {
+        this.pointRule = pointRule;
     }
 
     /**
