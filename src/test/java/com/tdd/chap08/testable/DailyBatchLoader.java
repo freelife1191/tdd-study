@@ -15,6 +15,10 @@ public class DailyBatchLoader {
     private Times times = new Times();
     private String basePath = ".";
 
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
+    }
+
     public void setTimes(Times times) {
         this.times = times;
     }
