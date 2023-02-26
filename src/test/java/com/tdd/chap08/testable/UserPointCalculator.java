@@ -9,8 +9,6 @@ import com.tdd.chap08.subs.User;
 
 import java.time.LocalDate;
 
-import static com.tdd.chap08.subs.Grade.GOLD;
-
 /**
  * [실행 시점에 따라 달라지는 결과]
  * 기능 구현이 섞여 있어 특정한 부분만 테스트하기 어려운 코드
@@ -34,17 +32,7 @@ public class UserPointCalculator {
         Product p = productDao.selectById(s.getProductId());
         // 현재 시간을 기준으로 LocalDate 값을 구함
         LocalDate now = LocalDate.now();
-        int point = 0;
-        // 이 값을 기준으로 구독이 끝났는지 확인
-        if (s.isFinished(now)) {
-            point += p.getDefaultPoint();
-        } else {
-            point += p.getDefaultPoint() + 10;
-        }
-        if (s.getGrade() == GOLD) {
-            point += 100;
-        }
-        return point;
+        return PointRule.calculate(s, p, now);
     }
 
 }
