@@ -12,12 +12,23 @@ import java.util.stream.Collectors;
 
 /**
  * [하드 코딩된 상수를 생성자나 메서드 파라미터로 받기]
- * 세터를 이용해서 값을 교체 가능하게 함으로써 테스트가 쉬워짐
  */
 public class PaySync {
     private PayInfoDao payInfoDao = new PayInfoDao();
     private String filePath = "D:\\data\\pay\\cp0001.csv";
 
+    /**
+     * 생성자를 통해서 의존 대상을 주입하게 수정해서 테스트 가능하게 함
+     */
+    /*
+    public PaySync(PayInfoDao payInfoDao) {
+        this.payInfoDao = payInfoDao;
+    }
+    */
+
+    /**
+     * 세터를 이용해서 값을 교체 가능하게 함으로써 테스트가 쉬워짐
+     */
     public void setPayInfoDao(PayInfoDao payInfoDao) {
         this.payInfoDao = payInfoDao;
     }
