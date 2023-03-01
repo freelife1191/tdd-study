@@ -1,0 +1,47 @@
+spring:
+  sql:
+    init:
+      # embedded DataSource의 schema를 생성
+      # 기본값: always, 생성안함: never
+      mode: always
+  datasource:
+    ## h2 DB
+    url: jdbc:h2:mem:testdb;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=MYSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+#    url: jdbc:mysql://localhost:3306/test
+#    username: root
+#    password: 1
+    hikari:
+      maximum-pool-size: 4
+  h2:
+    console:
+      ## h2 console ??
+      enabled: true
+  jpa:
+    # JPA는 schema-${platform}.sql과 data-${platform}.sql 파일이 있다면 실행시켜 데이터베이스 플랫폼에 맞춘 스크립트 실행이 가능하다
+    # 사용할 플랫폼 정의는 spring.datasource.platform값을 따른다
+    database-platform: org.hibernate.dialect.MySQL57Dialect
+    # JPA SQL을 로그에 보여줌
+    show-sql: true
+    # ddl-auto 속성을 사용할지 말지를 결정하는 옵션이다
+    # 기본값이 false이기 JPA에 의한 자동 초기화 기능을 사용하려면 true로 바꾸고 사용한다
+    generate-ddl: true
+    hibernate:
+      #none: 아무것도 실행하지 않는다 (대부분의 DB에서 기본값이다)
+      #create-drop: SessionFactory가 시작될 때 drop및 생성을 실행하고, SessionFactory가 종료될 때 drop을 실행한다 (in-memory DB의 경우 기본값이다)
+      #create: SessionFactory가 시작될 때 데이터베이스 drop을 실행하고 생성된 DDL을 실행한다
+      #update: 기존의 스키마를 유지하며 JPA에 의해 변경된 부분만 추가한다.
+      #validate: 엔티티와 테이블이 정상적으로 매핑되어있는지만 검증한다.
+      ddl-auto: create
+    properties:
+      hibernate:
+#        dialect: org.hibernate.dialect.MySQL57Dialect
+        # JPA SQL에 `로 감싸서 처리
+        globally_quoted_identifiers: true
+    # 하이버네이트 초기화를 initialize SQL보다 우선적으로 실행되도록 설정
+    defer-datasource-initialization: true
+logging:
+  level:
+    root: info
