@@ -1,7 +1,5 @@
 package com.tdd.chap09.user;
 
-import com.tdd.chap09.user.DupIdException;
-import com.tdd.chap09.user.UserRegister;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
+ * [외부 연동이 필요한 테스트 예]
  * 스프링 테스트 지원 기능을 이용한 UserRegister 통합 테스트
  */
 @SpringBootTest

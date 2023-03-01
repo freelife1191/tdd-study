@@ -1120,3 +1120,33 @@ classDiagram
     }
     class VirtualEmailNortifier
 ```
+
+#### WireMock을 이용한 REST 클라이언트 테스트
+
+외부 API 통신 테스트 필요시 원하는 상황을 쉽게 만들 기 위해 WireMock을 사용
+
+WireMock을 사용해 서버 API를 스텁으로 대체  
+올바른 응답이나 타임아웃과 같은 상황에 대해 테스트할 수 있음
+
+WireMockServer는 Http 서버를 흉내 낸다. 일반적인 사용법은 다음과 같다.
+
+- 테스트 실행 전에 WireMockServer를 시작한다. 실제 HTTP 서버가 뜬다.
+- 테스트에서 WireMockServer의 동작을 기술한다.
+- HTTP 연동을 수행하는 테스트를 실행한다.
+- 테스트 실행 후에 WireMockServer를 중지한다.
+
+WireMockServer가 다음과 같이 동작하도록 기술한다.
+
+- 요청이 다음과 같으면
+  - URL이 "/card"
+  - POST 요청
+  - 요청 몸체가 "1234567890"
+- 아래와 같이 응답
+  - Content-Type이 text/plain이고
+  - 응답 몸체가 "ok"
+
+> WireMock은 JSON/XML 응답, HTTPS 지원, 단독 실행 등 다양한 기능을 제공하므로 외부 연동 코드를 테스트할 때 유용하게 사용할 수 있음  
+> WireMock에 대한 보다 자세한 정보는 wiremock.org 사이트에서 얻을 수 있다
+
+- 참고
+  - https://wiremock.org/docs/download-and-installation/
