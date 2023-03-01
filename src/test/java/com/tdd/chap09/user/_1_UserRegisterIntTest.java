@@ -1,4 +1,4 @@
-package com.tdd.chap09;
+package com.tdd.chap09.user;
 
 import com.tdd.chap09.user.DupIdException;
 import com.tdd.chap09.user.UserRegister;
