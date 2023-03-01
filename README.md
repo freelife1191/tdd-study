@@ -1076,3 +1076,47 @@ TDD를 하는지 여부에 상관없이 테스트 코드를 작성하는 개발�
 그래야 테스트 실행 시간이 증가해 피드백이 느려지는 것을 방지할 수 있다  
 테스트 실행 속도가 느려지면 테스트를 작성하지 않거나 테스트 실행을 생략하는 상황이 벌어진다  
 이는 결국 소프트웨어의 품질 저하로 이어질 수 있기 때문에 가능하면 빠른 시간 내에 테스트를 실행할 수 있도록 해야 한다
+
+### 외부 연동이 필요한 테스트 예
+
+소프트웨어는 다양한 외부 연동이 필요하다
+외부 연동 대상은 쉽게 제어할 수 없기 때문에 연동해야 할 대상이 늘어날수록 통합 테스트도 힘들어진다
+
+모든 외부 연동 대상을 통합 테스트에서 다룰 수 없지만, 일부 대상은 어느 정도 수준에서 제어가 가능하다  
+그중에서 이 장에서는 DB 연동과 HTTP 연동을 위한 테스트 코드 작성 예를 살펴본다
+
+#### 스프링 부트와 DB 통합 테스트
+
+```mermaid
+---
+title: 스프링 부트와 DB 통합 테스트
+---
+classDiagram
+    direction TB
+    UserRegister ..> WeakPasswordChecker
+    UserRegister ..> UserRepository
+    UserRegister ..> EmailNotifier
+    WeakPasswordChecker <|.. SimpleWeakPasswordChecker
+    EmailNotifier <|.. VirtualEmailNortifier
+    class UserRegister {
+        -passwordChecker : WeakPasswordChecker
+        -userRepository : UserRepository
+        -emailNotifier : EmailNotifier
+        +register(id: String, pw: String, email: String)
+    }
+    class WeakPasswordChecker {
+        <<interface>>
+        +checkPasswordWeak(pw: String)  boolean
+    }
+    class SimpleWeakPasswordChecker
+    class UserRepository {
+        <<interface>>
+        +findById(id: String) User
+        +save(user: User)
+    }
+    class EmailNotifier {
+        <<interface>>
+        +sendRegisterEmail(email: String)
+    }
+    class VirtualEmailNortifier
+```
