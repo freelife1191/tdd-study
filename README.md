@@ -1155,3 +1155,1425 @@ WireMockServer가 다음과 같이 동작하도록 기술한다.
 
 스프링 부트는 테스트에서 웹 환경을 구동할 수 있는 기능을 제공한다  
 이 테스트는 이 기능을 사용해서 내장 서버를 구동하고 스프링 웹 어플리케이션을 실행한다
+
+
+---
+
+
+## Chapter 10. 테스트 코드와 유지보수
+
+- 테스트 코드와 유지보수
+- 테스트 코드 유지보수를 위한 주의 사항
+
+### 테스트 코드와 유지보수
+
+빠른 서비스 출시를 위해 CI(Continuous Integration: 지속적 통합)와 CD(Continuous Delivery 또는 Continuous Deployment: 지속적 전달 또는 지속적 배포)를 도입하는 곳이 증가하고 있다  
+
+- 지속적으로 코드를 통합하고 출시 가능한 상태로 만들고 배포하려면 새로 추가한 코드가 기존 기능을 망가뜨리지 않는지 확인할 수 있어야 한다  
+- 자동화 테스트는 CI/CD의 필수 요건 중 하나이다  
+
+TDD를 하는 과정에서 작성한 테스트 코드는 CI/CD에서 자동화 테스트로 사용되어 버그가 배포되는 것을 막아주고 이는 소프트웨어 품질이 저하되는 것을 방지한다
+
+- 테스트 코드는 제품 코드와 동일하게 유지보수 대상이 된다  
+- 테스트 코드를 유지보수하는 데 시간이 많이 들기 시작하면 점점 테스트 코드를 손보지 않아 실패하는 테스트가 증가하게 된다  
+- 깨지는 테스트를 방치하는 상황이 길어지면 다음과 같은 문제가 발생할 수 있다
+  - 문제1: 실패한 테스트가 새로 발생해도 무감각해진다. 테스트 실패 여부에 상관없이 빌드하고 배포하기 시작한다
+  - 문제2: 빌드를 통과시키기 위해 실패한 테스트를 주석 처리하고 실패한 테스트는 고치지 않는다
+
+이런 상황이 발생하면 테스트 코드는 가치를 읽기 시작한다  
+
+테스트 코드는 코드를 변경했을 때 기존 기능이 올바르게 동작하는지 확인하는 회귀 테스트(regression test)를  
+자동화하는 수단으로 사용되는데 깨진 테스트를 방치하기 시작하면 회귀 테스트가 검증하는 범위가 줄어든다  
+
+이는 코드에 버그가 발생했을때 놓칠 가능성이 커지는 것을 의미한다. 즉 소프트웨어 품질이 낮아질 가능성이 커진다
+
+- 실패한 테스트를 통과시키기 위해 많은 노력이 필요하면 점점 테스트 코드에서 멀어지고 TDD에서도 멀어짐  
+- 테스트 코드를 만들지 않으면, 테스트가 가능하지 않은 코드를 만들게 되고 이는 다시 테스트 코드 작성을 어렵게 만듬  
+- 테스트 코드가 줄어들면 수동으로 테스트하는 범위가 증가함  
+  - 수동 테스트는 자동화된 테스트에 비해 오랜 시간이 걸림
+  - 다룰 수 있는 범위도 제한됨
+  - 기존 코드에 문제가 있어도 놓칠 가능성이 커지게 됨  
+
+이런 악순환이 발생하지 않으려면 테스트 코드 자체의 유지보수성이 좋아야 한다  
+테스트 코드를 유지보수하기 좋아야 지속적으로 테스트를 작성하게 되고 결과적으로 소프트웨어의 품질이 떨어지는 것도 막을 수 있다  
+
+유지보수하기 좋은 코드를 만들기 위해 필요한 좋은 패턴과 원칙이 존재하는 것처럼 좋은 테스트 코드를 만들려면 몇 가지 주의해야 할 사항이 있다  
+주의 사항만 잘 지키려고 노력해도 테스트 코드의 유지보수성이 떨어지는 것을 방지할 수 있을 것이다
+
+
+### 변수나 필드를 사용해서 기댓값 표현하지 않기
+
+
+**기대하는 값에 변수를 사용한 예**
+
+문자열 연결이 있어 코드가 복잡하고 테스트를 실행해서 깨져야 비로소 실수를 알아채기도 한다
+
+```java
+@Test
+void dateFormat() {
+    LocaDate date = LocalDate.of(1945, 8, 15);
+    String dateStr = formatDate(date);
+    assertEquals(date.getYear() + "년 " + date.getMonthValue() + "월 " + date.getDayOfMonth() + "일", dateStr);
+}
+```
+
+**기대하는 값에 문자열 값을 사용한 예**
+
+기대하는 값이 명확하게 표현되고 있고, 메서드를 잘못 사용할 일도 없고, 테스트가 깨지면 `formatDate()` 메서드만 확인하면 됨
+
+```java
+@Test
+void dateFormat() {
+    LocaDate date = LocalDate.of(1945, 8, 15);
+    String dateStr = formatDate(date);
+    assertEquals("1945년 8월 15일", dateStr);
+}
+```
+
+**단언과 객체 생성에 필드와 변수를 사용한 코드**
+
+테스트 메서드가 많으면 테스트 코드를 이해하기 위해 편집창을 이러저리 왔다 갔다 해야 한다
+
+```java
+private List<Integer> answers = Arrays.asList(1, 2, 3, 4);
+private Long respondentId = 100L;
+
+@DisplayName("답변에 성공하면 결과 저장함")
+@Test
+public void saveAnswerSuccessfully() {
+    // 답변할 설문이 존재
+    Survey survey = SurveyFactory.createApprovedSurvey(1L);
+    surveyRepository.save(survey);
+    
+    // 설문 답변
+    SurveyAnswerRequest surveyAnswer = SurveyAnswerRequest.builder()
+        .surveyId(survey.getId())
+        .respondentId(respondentId)
+        .answers(answers)
+        .build();
+    
+    svc.answerSurvey(surveyAnswer);
+    
+    // 저장 결과 확인
+    SurveyAnswer savedAnswer = memoryRepository.findBySurveyAndRespondent(survey.getId(), respondentId);
+    assertAll(
+      () -> assertEquals(respondentId, savedAnswer.getRespondentId()),
+      () -> assertEquals(answers.size(), savedAnswer.getAnswers().size()),
+      () -> assertEquals(answers.get(0), savedAnswer.getAnswers().get(0)),
+      () -> assertEquals(answers.get(1), savedAnswer.getAnswers().get(1)),
+      () -> assertEquals(answers.get(2), savedAnswer.getAnswers().get(2)),
+      () -> assertEquals(answers.get(2), savedAnswer.getAnswers().get(3))
+    );
+}
+```
+
+테스트에 통과하지 못한 실패 메시지
+
+```
+org.opentest4j.AssertionFailedError:
+Expected: 3
+Actual: 4
+```
+
+객체를 생성할 때 변수와 필드 대신 값 자체를 사용했음
+
+코드 가독성이 좋아져서 테스트 코드를 더욱 쉽게 파악할 수 있다  
+객체를 생성할 때 사용한 값이 무엇인지 알아보기 위해 필드와 변수를 참조하지 않아도 됨
+
+```java
+private List<Integer> answers = Arrays.asList(1, 2, 3, 4);
+private Long respondentId = 100L;
+
+@DisplayName("답변에 성공하면 결과 저장함")
+@Test
+public void saveAnswerSuccessfully() {
+    // 답변할 설문이 존재
+    Survey survey = SurveyFactory.createApprovedSurvey(1L);
+    surveyRepository.save(survey);
+    
+    // 설문 답변
+    SurveyAnswerRequest surveyAnswer = SurveyAnswerRequest.builder()
+        .surveyId(1L)
+        .respondentId(100L)
+        .answers(Arrays.asList(1, 2, 3, 4))
+        .build();
+    
+    svc.answerSurvey(surveyAnswer);
+    
+    // 저장 결과 확인
+    SurveyAnswer savedAnswer = memoryRepository.findBySurveyAndRespondent(1L, 100L);
+    assertAll(
+      () -> assertEquals(100L, savedAnswer.getRespondentId()),
+      () -> assertEquals(4, savedAnswer.getAnswers().size()),
+      () -> assertEquals(1, savedAnswer.getAnswers().get(0)),
+      () -> assertEquals(2, savedAnswer.getAnswers().get(1)),
+      () -> assertEquals(3, savedAnswer.getAnswers().get(2)),
+      () -> assertEquals(4, savedAnswer.getAnswers().get(3))
+    );
+}
+```
+
+### 두개 이상을 검증하지 않기
+
+처음 테스트 코드를 작성하면 한 테스트 메서드에 가능한 많은 단언을 하려고 시도한다  
+그 과정에서 서로 다른 검증을 섞는 경우가 있다
+
+**두 가지를 검증하는 코드**
+
+한 테스트에서 검증하는 내용이 두 개 이상이면 테스트 결과를 확인할 때 집중도가 떨어진다  
+첫 번째 테스트 검증이 통과해야 두번째 테스트를 검증하고  
+테스트에 실패했을 때 두 가지 검증 대상 중 무엇이 실패했는지 확인해야 한다
+
+```java
+@DisplayName("같은 ID가 없으면 가입에 성공하고 메일을 전송함")
+@Test
+void registerAndSendMail() {
+    userRegister.register("id", "pw", "email");
+    
+    // 검증1: 회원 데이터가 올바르게 저장되었는지 검증
+    User savedUser = fakeRepository.findById("id");
+    assertEquals("id", savedUser.getId());
+    assertEquals("email", savedUser.getEmail());
+    
+    // 검증2: 이메일 발송을 요청했는지 검증
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    BDDMockito.then(mockEmailNotifier).should().sendRegisterEmail(captor.capture());
+    
+    String realEmail = captor.getValue();
+    assertEquals("email@email.com", realEmail);
+}
+```
+
+**각 검증 대상을 별도 테스트로 분리한 코드**
+
+한 테스트 메스드에서 서로 다른 내용을 검증한다면 각 검증 대상을 별도 분리해서 테스트의 집중도를 높일 수 있다
+
+```java
+@DisplayName("같은 ID가 없으면 가입 성공함")
+@Test
+void noDupId_RegisterSuccess() {
+    userRegister.register("id", "pw", "email");
+    
+    User savedUser = fakeRepository.findById("id");
+    assertEquals("id", savedUser.getId());
+    assertEquals("email", savedUser.getEmail());
+}
+
+@DisplayName("가입하면 메일을 전송함")
+@Test
+void whenRegisterThenSendMail() {
+    userRegister.register("id", "pw", "email@email.com");
+        
+    ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+    then(mockEmailNotifier).should().sendRegisterEmail(captor.capture());
+    
+    String realEmail = captor.getValue();
+    assertEquals("email@email.com", realEmail);
+}
+```
+
+한 테스트가 한 가지만 검증하므로 테스트에 실패했을 때 무엇이 잘못되었는지 빨리 알 수 있고 검증 대상이 한정되어 있으므로 테스트도 빨리 통과시킬 수 있다
+
+물론 테스트 메서드가 반드시 한 가지만 검증해야 하는 것은 아니지만, 검증 대상이 명확하게 구분된다면 테스트 메서드도 구분하는 것이 유지보수에 유리하다
+
+
+### 정확하게 일치하는 값으로 모의 객체 설정하지 않기
+
+**정확하게 일치하는 상황을 정의한 모의 객체**
+
+이 테스트는 작은 변화에도 실패한다  
+모의 객체는 "pw"가 아니라 임의의 문자열에 대해 true를 리턴해도 이 테스트의 의도에 전혀 문제가 되지 않는다
+
+```java
+@DisplayName("약한 암호면 가입 실패")
+@Test
+void registerAndSendMail() {
+    BDDMockito.given(mockPasswordChecker.checkPasswordWeak("pw")).willReturn(true);
+
+    assertThrows(WeakPasswordException.class, () -> {
+        userRegister.register("id", "pw", "email");
+    });
+}
+```
+
+**정확한 값이 아니라 임의의 값에 일치하도록 모의 객체 지정**
+
+아래와 같이 변경해도 원하는 테스트를 수행할 수 있다  
+모의 객체가 임의의 String 값에 대해 true를 리턴하도록 설정한다
+
+"pw"가 아닌 다른 문자열을 인자로 전달해도 테스트는 깨지지 않는다  
+어떤 문자열을 전달해도 약한 암호인 경우에 대한 테스트를 올바르게 수행할 수 있다
+
+```java
+@DisplayName("약한 암호면 가입 실패")
+@Test
+void registerAndSendMail() {
+    BDDMockito.given(mockPasswordChecker.checkPasswordWeak(Mockito.anyString())).willReturn(true);
+
+    assertThrows(WeakPasswordException.class, () -> {
+        userRegister.register("id", "pw", "email");
+    });
+}
+```
+
+모의 객체를 호출했는지 여부를 확인하는 경우도 동일하다  
+전달할 파라미터 값이 조금만 바뀌어도 테스트가 깨지게 된다
+
+```java
+@DisplayName("회원 가입시 암호 검사 수행함")
+@Test
+void registerAndSendMail() {
+    userRegister.register("id", "pw", "email");
+
+    BDDMockito.then(mockPasswordChecker)
+        .should()
+        .checkPasswordWeak("pw");
+}
+```
+
+모의 객체는 가능한 범용적인 값을 사용해서 기술해야 한다  
+한정된 값에 일치하도록 모의 객체를 사용하면 약간의 코드 수정만으로도 테스트는 실패하게 된다
+
+
+### 과도하게 구현 검증하지 않기
+
+테스트 코드를 작성할 때 주의할 점은 테스트 대상의 내부 구현을 검증하는 것이다  
+이것이 결과적으로 테스트 코드 유지보수에 도움이 되지 않는다
+
+**불필요한 구현 검증**
+
+내부 구현을 검증하는 것이 나쁜 것은 아니지만 한 가지 단점이 있다  
+구현을 조금만 변경해도 테스트가 깨질 가능성이 커진 다는 것이다  
+
+태부 구현은 언제든지 바뀔 수 있기 때문에 테스트 코드는 내부 구현보다 실행 결과를 검증해야 한다  
+그렇게 함으로써 내부 구현을 일부 바꿔도 테스트가 깨지지 않게 유지할 수 있다
+
+```java
+@DisplayName("회원 가입시 암호 검사 수행함")
+@Test
+void checkPassword() {
+    userRegister.register("id", "pw", "email");
+
+    // PasswordChecker#checkPasswordWeak() 메서드 호출 여부 검사
+    BDDMockito.then(mockPasswordChecker)
+            .should()
+            .checkPasswordWeak(Mockito.anyString());
+
+    // UserRepository#findById() 메서드를 호출하지 않는 것을 검사
+    BDDMockito.then(mockRepository)
+        .should(Mockito.never())
+        .findById(Mockito.anyString());
+}
+```
+
+이미 존재하는 코드에 단위 테스트를 추가하면 어쩔 수 없이 내부 구현을 검증해야 할 때도 있다
+
+```java
+public void changeEmail(String id, String email) {
+    int cnt = userDao.countById(id);
+    if (cnt == 0) {
+        throw new NoUserException();
+    }
+    userDao.updateEmail(id, email);
+}
+```
+
+레거시 코드에서 DAO는 다양한 메서드를 정의하고 있는 경우가 많기 때문에 메모리를 이용한 가짜 구현으로 대체하기가 쉽지 않다  
+그래서 레거시 코드에 대한 테스트 코드를 작성할 때는 모의 객체를 많이 활용한다
+
+```java
+@Test
+void changeEmailSuccessfully() {
+    given(mockDao.countById(Mockito.anyString())).willReturn(1);
+    
+    emailService.changeEmail("id", "new@somehost.com")
+    
+    then(mockDao).should()
+        // 이메일을 수정했는지 확인하기 위해 모의 객체 메서드가 호출됐는지 확인
+        .updateEmail(Mockito.anyString(), Mockito.matches("new@somehost.com"));
+}
+```
+
+모의 객체를 호출하는지 여부를 확인하는 것은 구현을 검증하는 것이지만 이메일이 변경되는지 확인할 수 있는 수단은 이것 뿐이다
+
+> 기능이 정상적으로 동작하는지 확인할 수단이 구현 검증밖에 없다면 모의 객체를 사용해서 테스트 코드를 작성해야 하지만  
+> 일단 테스트 코드를 작성한 뒤에는 점진적으로 코드를 리팩토링해서 구현이 아닌 결과를 검증할 수 있도록 시도해야 한다  
+> 그렇게 함으로써 향후에 사소한 구현 변경으로 인해 테스트가 깨지는 것을 방지할 수 있고 또한 코드의 테스트 가능성도 높일 수 있다
+
+
+### 셋업을 이용해서 중복된 상황을 설정하지 않기
+
+**상황 관련 코드의 중복을 제거한 예**
+
+테스트 코드를 작성하다 보면 각 테스트 코드에서 동일한 상황이 필요할 때가 있다  
+이 경우 중복된 코드를 제거하기 위해 `@BeforeEach` 메서드를 이용해서 상황을 구성할 수 있다
+
+```java
+@BeforeEach // 모든 테스트 메서드에 동일한 상황을 적용
+void setUp() {
+    changeService = new ChangeUserService(memoryRepository);
+    // ID가 id이고 암호가 pw인 User 데이터가 존재하는 상황을 만든다
+    memoryRepository.save(new User("id", "name", "pw", new Address("서울", "북부")));
+}
+
+@Test
+void noUser() {
+    assertThrows(UserNotFoundException.class,
+        () -> changeService.changeAddress("id2", new Address("서울", "남부"))
+    );
+}
+
+@Test
+void changeAddress() {
+    changeService.changeAddress("id", new Address("서울", "남부"));
+
+    User user = memoryRepository.findById("id");
+    assertEquals("서울", user.getAddress().getCity());
+}
+
+@Test
+void changePw() {
+    changeService.changePw("id", "pw", "newpw");
+
+    User user = memoryRepository.findById("id");
+    assertEquals(user.matchPassword("newpw"));
+}
+
+// 몇 달 만에 다시 코드를 보면 기억이 잘 나지 않기 때문에 setUp() 메서드를 확인 해야 한다
+@Test
+void pwNotMatch() {
+    assertThrows(IdPwNotMatchException.class,
+        () -> changeService.changePw("id", "pw2", "newpw")
+    );
+}
+```
+
+모든 테스트 메서드가 동일한 상황 코드를 공유하기 때문에 조금만 셋업 메서드 내용을 변경해도 테스트가 깨질 수 있다  
+setUp() 메서드에서 User 객체를 생성할 때 사용한 "pw"를 "pw2"로 변경시 `changePw()` 테스트와 `pwNotMatch()` 테스트가 실패한다
+
+```java
+@BeforeEach // 모든 테스트 메서드에 동일한 상황을 적용
+void setUp() {
+    changeService = new ChangeUserService(memoryRepository);
+    // ID가 id이고 암호가 pw인 User 데이터가 존재하는 상황을 만든다
+    memoryRepository.save(new User("id", "name", "pw2", new Address("서울", "북부")));
+}
+```
+
+각 테스트 메서드를 위한 상황을 셋업 메서드에서 모두 설정해도 비슷한 문제가 발생한다
+
+```java
+@BeforeEach // 모든 테스트 메서드에 동일한 상황을 적용
+void setUp() {
+    // 중복 ID 확인 용
+    memoryRepository.save(new User("id", "name", "pw", new Address("서울", "북부")));
+    // 암호 변경 기능 테스트 용
+    memoryRepository.save(new User("id2", "name", "p1", new Address("서울", "북부")));
+    // 주소 변경 기능 테스트 용
+    memoryRepository.save(new User("id3", "name", "p1", new Address("서울", "남부")));
+}
+```
+
+테스트 메서드는 검증을 목표로 하는 하나의 완전한 프로그램이어야 한다  
+각 테스트 메서드는 별도 프로그램으로서 검증 내용을 스스로 잘 설명할 수 있어야 한다  
+그러기 위해서는 상황 구성 코드가 테스트 메서드 안에 위치해야 한다  
+그래야 테스트 메서드 스스로 완전하게 테스트 내용을 설명할 수 있다
+
+
+
+**각 테스트 메서드가 자신에 맞게 상황을 설정하는 코드**
+
+코드는 다소 길어졌지만, 테스트 메서드 자체는 스스로를 더 잘 설명하고 있다  
+테스트에 실패해도 코드를 이리저리 왔다 갔다 하면서 보지 않아도 된다  
+실패한 테스트 메서드 위주로 코드를 보면된다. 각 테스트에 맞게 상황을 설정하는 것도 쉽다  
+한 테스트 메서드의 상황을 변경해도 다른 테스트에 영향을 주지 않기 때문이다
+
+셋업 메서드를 이용해서 여러 메서드에 동일한 상황을 적용하는 것이 처음에는 편리하지만,  
+시간이 지나면 테스트 코드를 이해하고 유지 보수하는데 오히려 방해 요소가 된다  
+테스트 메서드는 자체적으로 검증하는 내용을 완전히 기술하고 있어야 테스트 코드를 유지보수하는 노력을 줄일 수 있다
+
+```java
+@BeforeEach // 모든 테스트 메서드에 동일한 상황을 적용
+void setUp() {
+    changeService = new ChangeUserService(memoryRepository);
+}
+
+@Test
+void noUser() {
+    assertThrows(UserNotFoundException.class,
+        () -> changeService.changeAddress("id", new Address("서울", "남부"))
+    );
+}
+
+@Test
+void changeAddress() {
+    // 주소 변경 기능 테스트 용
+    memoryRepository.save(new User("id", "name", "pw", new Address("서울", "북부")));
+        
+    changeService.changeAddress("id", new Address("경기", "남부"));
+
+    User user = memoryRepository.findById("id");
+    assertEquals("경기", user.getAddress().getCity());
+}
+
+@Test
+void changePw() {
+    // 암호 변경 기능 테스트 용
+    memoryRepository.save(new User("id", "name", "oldpw", new Address("서울", "북부")));
+        
+    changeService.changePw("id", "oldpw", "newpw");
+
+    User user = memoryRepository.findById("id");
+    assertEquals(user.matchPassword("newpw"));
+}
+```
+
+
+#### 통합 테스트에서 데이터 공유 주의하기
+
+셋업을 이용한 상황 설정과 비슷한 것으로 통합 테스트의 DB 데이터 초기화가 있다  
+DB 연동을 포함한 통합 테스트를 실행하려면 DB 데이터를 알맞게 구성해야 한다  
+이를 위한 방법은 테스트를 실행할 때마다 DB 데이터를 초기화하는 쿼리를 실행하는 것이다  
+스프링 프레임워크를 사용하면 `@sql` 애노테이션을 사용해서 테스트를 실행하기 전에 특정 쿼리를 실행할 수 있다
+
+**테스트 메서드 간 데이터 공유**
+
+```java
+@SpringBootTest
+@Sql("classpath:init-data.sql")
+public class UserRegisterIntTestUsingSql {
+    @Autowired
+    private UserRegister register;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Test
+    void 동일ID가_이미_존재하면_익셉션() {
+        // 실행, 결과 확인
+        assertThrows(DupIdException.class,
+            () -> register.register("cbk", "strongpw", "email@email.com")
+        );
+    }
+
+    @Test
+    void 존재하지_않으면_저장함() {
+        // 실행
+        register.register("cbk2", "strongpw", "email@email.com");
+        // 결과 확인
+        SqlRowSet rs = jdbcTemplate.queryForRowSet("select * from user where id = ?", "cbk2");
+        rs.next();
+        assertEquals("email@email.com", rs.getString("email"));
+    }
+}
+```
+
+`@Sql` 애노테이션으로 지정한 sql 파일은 다음과 같이 테스트에 필요한 데이터를 초기화한다  
+이는 곧 테스트를 위한 상황을 만들어 준다
+
+```sql
+truncate table user;
+insert into user values ('cbk', 'pw', 'cbk@cbk.com');
+insert into user values ('tddhit', 'pw1', 'tddhit@ilovetdd.com');
+```
+
+이 쿼리는 여러 테스트가 동일한 데이터를 사용할 수 있게 만들어준다  
+통합 테스트 메서드는 데이터 초기화를 위한 코드를 작성하지 않아도 된다  
+이 방식은 편리하지만 셋업 메서드를 이용한 상황 설정과 마찬가지로 초기화를 위한 쿼리 파일을 조금만 변경해도 많은 테스트가 깨질 수 있고   
+테스트가 깨지면 관련된 쿼리 파일을 같이 봐야 한다. 이는 테스트 코드의 유지 보수를 귀찮고 어렵게 만든다  
+
+통합 테스트 코드를 만들 때는 다음의 두 가지로 초기화 데이터를 나눠서 생각해야 한다  
+
+- 모든 테스트가 같은 값을 사용하는 데이터: 예) 코드값 데이터
+- 테스트 메서드에서만 필요한 데이터: 예) 중복 ID 검사를 위한 회원 데이터
+
+코드값 데이터는 (거의) 바뀌지 않는다. 모든 테스트가 동일한 코드값 데이터를 사용해도 문제가 없으며
+오히려 서로 다른 코드값 데이터를 사용하면 문제가 발생할 수 있다  
+이렇게 모든 테스트가 다른 값을 사용하면 안 되는 데이터는 동일한 데이터를 공유해도 된다
+
+반면에 특정 테스트 에서만 의미 있는 데이터는 모든 테스트가 공유할 필요가 없다  
+특정 테스트에서만 생성해서 테스트 코드가 완전한 하나가 되도록 해야 한다
+
+
+**특정 테스트에서만 의미 있는 데이터는 해당 테스트 메서드에서만 생성**
+
+```java
+@Test
+void dupId() {
+    // 상황
+    jdbcTemplate.update(
+      "insert into user values (?,?,?) " +
+      "on duplicate key update password = ?, email = ?",
+      "cbk", "pw", "cbk@cbk.com", "pw", "cbk@cbk.com");
+
+    // 실행, 결과 확인
+    assertThrows(DupIdException.class,
+        () -> register.register("cbk", "strongpw", "email@email.com")
+    );
+}
+```
+
+
+#### 통합 테스트의 상황 설정을 위한 보조 클래스 사용하기
+
+DB 연동을 포함한 통합 테스트 코드인데 상황 설정을 위해 직접 쿼리를 실행하고 있다  
+이 쿼리는 중복 ID를 가진 회원이 존재하는 상황을 만들기 위해 필요한 회원 데이터를 생성한다  
+비슷하게 이메일 수정 기능을 테스트할 때에도 유사한 쿼리를 실행해야 한다
+
+각 테스트 메서드에서 상황을 직접 구성함으로써 테스트 메서드를 분석하기는 좋아졌는데 반대로 상황을 만들기 위한 코드가 여러 테스트 코드에 중복된다  
+테이블 이름이나 칼럼 이름이 바뀌면 여러 테스트 메서드를 수정해야 하므로 유지보수에 좋지 않다
+
+테스트 메서드에서 직접 상황을 구성하면서 코드 중복을 없애는 방법이 있는데 그것은 바로 상황 설정을 위한 보조 클래스를 사용하는 것이다
+
+
+**통합 테스트를 위한 상황 설정 클래스**
+
+
+```java
+public class UserGivenHelper {
+  private JdbcTemplate jdbcTemplate;
+
+  public UserGivenHelper(JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
+
+  public void givenUser(String id, String pw, String email) {
+    jdbcTemplate.update(
+      "insert into user values (?,?,?) " +
+      "on duplicate key update password = ?, email = ?",
+      "id", "pw", "email", "pw", "email");
+  }
+}
+```
+
+
+**상황 보조 클래스를 이용한 상황 설정**
+
+상황 설정을 위한 보조 도구를 사용하면 `givenUser()`라는 메서드 이름을 사용하므로 어떤 상황을 구성하는지 이해할 수 있고    
+각 테스트 메서드에서 상황을 구성하기 위해 코드가 중복되는 것도 방지할 수 있다
+
+```java
+@Autowired JdbcTemplate jdbcTemplate;
+private UserGivenHelper given;
+
+@BeforeEach
+void setUp() {
+    given = new UserGivenHelper(jdbcTemplate);
+}
+
+@Test
+void dupId() {
+    // 상황 설정을 위한 보조 도구를 사용
+    given.givenUser("cbk", "pw", "cbk@cbk.com");
+
+    // 실행, 결과 확인
+    assertThrows(DupIdException.class,
+        () -> register.register("cbk", "strongpw", "email@email.com")
+    );
+}
+```
+
+통합 테스트에서 결과를 검증하는 코드는 직접 쿼리를 실행하고 그 값을 비교해야 한다
+
+```java
+// 이메일 주소가 변경되었는지 검증
+SqlRowSet rs = jdbcTemplate.queryForRowSet("select * from user where id = ?", "id");
+rs.next();
+assertEquals("email@email.com", rs.getString("email"));
+```
+
+검증을 위해 데이터를 조회하는 코드가 여러 테스트 메서드에 중복되어 있으면 유지보수에 좋지 않다  
+이럴 때는 상황 설정과 동일하게 결과 검증을 위한 보조 클래스를 만들어 테스트 코드를 유지보수하기 좋은 코드로 만들 수 있다
+
+
+---
+
+
+### 실행 환경이 다르다고 실패하지 않기
+
+같은 테스트 메서드가 실행 환경에 따라 성공하거나 실패하면 안된다  
+테스트를 실행하는 환경에 따라 테스트가 다르게 동작하면 안된다
+
+**절대 경로를 사용한 테스트**
+
+실행 환경에 따라 문제가 되는 전형적인 예가 파일 경로 이다
+
+D 드라이브가 없는 OS와 해당 경로가 없는 환경에서 이 테스트를 실행하면 항상 실패 한다  
+이런 코드는 특정인의 개발 환경에서만 올바르게 동작할 가능성이 크다
+
+```java
+public class BulkLoaderTest {
+    private String bulkFilePath = "D:\\mywork\\temp\\bulk.txt";
+    
+    @Test
+    void load() {
+        BulkLoader loader = new BulkLoader();
+        loader.load(bulkFilePath);
+        
+        ...생략
+    }
+}
+```
+
+이렇게 테스트에서 사용하는 파일은 프로젝트 폴더를 기준으로 상대 경로를 사용해야 한다
+
+
+**프로젝트를 기준으로 상대 경로를 사용한 테스트**
+
+```java
+public class BulkLoaderTest {
+    private String bulkFilePath = "src/test/resources/bulk.txt";
+    
+    @Test
+    void load() {
+        BulkLoader loader = new BulkLoader();
+        loader.load(bulkFilePath);
+        
+        ...생략
+    }
+}
+```
+
+
+**시스템이 제공하는 임시 폴더 경로를 사용한 테스트**
+
+테스트 코드에서 파일을 생성하는 경우에도 특정 OS나 본인의 개발 환경에서만 올바르게 동작하지 않도록 주의해야 한다
+OS가 제공하는 임시 폴더에 파일을 생성하면 실행 환경에 따라 테스트가 다르게 동작하는 것을 방지할 수 있다
+
+이 코드는 실행 환경에 알맞은 임시 폴더 경로를 구해서 동작하기 때문에 환경이 달라 테스트가 실패하는 상황은 벌어지지 않는다
+
+```java
+public class ExporterTest {
+    
+    @Test
+    void export() {
+        String folder = System.getProperty("java.io.tmpdir");
+        Exporter exporter = new Exporter(folder);
+        exporter.export("file.txt");
+        
+        Path path = Paths.get(folder, "file.txt");
+        assertTrue(Files.exists(path));
+    }
+}
+```
+
+**JUnit5는 OS에 따라 테스트를 실행할 수 있는 기능을 제공**
+
+간혹 특정 OS 환경에서만 실행해야 하는 테스트도 있다  
+이런 경우에도 JUnit5가 제공하는 `@EnabledOnOs` 애노테이션과 `@DisabledOnOs` 애노테이션을 사용해서 OS에 따른 테스트 실행 여부를 지정하면 된다
+
+```java
+@Test
+@EnabledOnOs({ OS.LINUX, OS.MAC })
+void callBash() {
+    // ...
+}
+
+@Test
+@DisabledOnOs(OS.WINDOWS)
+void changeMode() {
+    // ...
+}
+```
+
+
+---
+
+
+### 실행 시점이 다르다고 실패하지 않기
+
+다음 코드를 보자. 이 코드는 회원의 만료 여부를 확인하는 기능을 제공한다
+
+```java
+public class Member {
+    private LocalDateTime expiryDate;
+    
+    public boolean isExpired() {
+        return expiryDate.isBefore(LocalDateTime.now());
+    }
+}
+```
+
+이 기능을 검사하기 위한 테스트 코드
+
+**실행 시점에 따라 결과가 달라지는 테스트**
+
+```java
+@Test
+void notExpired() {
+    // 테스트 코드를 작성한 시점이 2019년 1월 1일
+    LocalDateTime expiry = LocalDateTime.of(2019, 12, 31, 0, 0, 0);
+    Member m = Member.builder().expiryDate(expiry).build();
+    assertFalse(m.isExpired());
+}
+```
+
+이 코드는 만료일을 2019년 12월 31일 0시 0분 0초로 설정하고 isExpired() 메서드의 결과가 false인지 확인한다  
+이 코드를 작성한 시점인 2019년 1월 1일에는 테스트에 문제가 발생하지 않는다  
+하지만 2019년 12월 31일에 테스트를 실행하면 깨진다  
+깨진 테스트를 복구하기 위해 누군가는 다음과 같이 2009년으로 변경할 수도 있다  
+
+```java
+@Test
+void notExpired() {
+    LocalDateTime expiry = LocalDateTime.of(2099, 12, 31, 0, 0, 0);
+    Member m = Member.builder().expiryDate(expiry).build();
+    assertFalse(m.isExpired());
+}
+```
+
+이렇게 변경하면 2019년 기준으로 80년 동안은 테스트가 깨지지 않겠지만, 이보다는 테스트 코드에서 시간을 명시적으로 제어할 수 있는 방법을 선택하는 것이 좋다  
+Member#isExpired()의 경우 시간을 파라미터로 전달받아 비교하는 방법을 사용할 수 있다
+
+```java
+import java.time.LocalDateTime;
+
+public class Member {
+    private LocalDateTime expiryDate;
+    
+    public boolean passedExpiryDate(LocalDateTime time) {
+        return expiryDate.isBefore(time);
+    }
+}
+```
+
+이제 테스트 코드는 다음과 같이 바뀐다
+
+```java
+void notExpired() {
+    LocalDateTime expiry = LocalDateTime.of(2019, 12, 31, 0, 0, 0);
+    Member m = Member.builder().expiryDate(expiry).build();
+    assertFalse(m.passedExpiryDate(LocalDateTime.of(2019, 12, 30, 0, 0, 0)));
+}
+```
+
+이 테스트 코드는 실행 시점에 상관없이 항상 통과한다  
+시간을 전달하면 경계 조건도 쉽게 테스트할 수 있다
+예를 들어 0.001초만 지나도 만료로 처리하는지 확인하는 코드를 작성할 수 있다
+
+```java
+@Test
+void expired_Only_1ms() {
+    LocalDateTime expiry = LocalDateTime.of(2019, 12, 31, 0, 0, 0);
+    Member m = Member.builder().expiryDate(expiry).build();
+    assertFalse(m.passedExpiryDate(LocalDateTime.of(2019, 12, 30, 0, 0, 0, 1000000)));
+}
+```
+
+시점을 제어하는 또 다른 방법은 별도의 시간 클래스를 작성하는 것이다
+
+현재 시간을 구하는 시간 클래스의 작성 예를 보자
+
+**시간 값을 제공하는 BizClock 클래스**
+
+```java
+import java.time.LocalDateTime;
+
+public class BizClock {
+  private static BizClock DEFAULT = new BizClock();
+  private static BizClock instance = DEFAULT;
+
+  public static void reset() {
+    instance = DEFAULT;
+  }
+
+  public static LocalDateTime now() {
+      return instance.timeNow();
+  }
+  
+  protected void setInstance(BizClock bizClock) {
+      BizClock.instance = bizClock;
+  }
+  
+  public LocalDateTime timeNow() {
+      return LocalDateTime.now();
+  }
+}
+```
+
+`Member#isExpired()`는 다음과 같이 BizClock 클래스를 이용해서 현재 시간을 구할 수 있다
+
+```java
+import java.time.LocalDateTime;
+
+public class Member {
+  private LocalDateTime expiryDate;
+  
+  public boolean isExpired() {
+      return expiryDate.isBefore(BizClock.now());
+  }
+}
+```
+
+BizClock 클래스의 정적 메서드인 `now()`는 `instance.timeNow()`를 실행해서 현재 시간 값을 리턴한다  
+`BizClock#timeNow()` 메서드는 `LocalDateTime.now()`를 이용해서 현재 시간을 구한다
+
+BizClock 클래스의 `setInstance()` 메서드를 사용하면 instance 정적 필드를 교체할 수 있으므로  
+BizClock을 상속받은 하위 클래스를 이용하면 `BizClock#now()`가 원하는 시간을 제공하도록 만들 수 있다  
+
+**시간 값을 제어하기 위해 BizClock 클래스를 상속해서 구현한 클래스**
+
+```java
+import java.time.LocalDateTime;
+
+class TestBizClock extends BizClock {
+    private LocalDateTime now;
+    
+    public TestBizClock() {
+        setInstance(this);
+    }
+    
+    public void setNow(LocalDateTime now) {
+        this.now = now;
+    }
+    
+    @Override
+    public LocalDateTime timeNow() {
+        return now != null ? now : super.now();
+    }
+}
+```
+
+TestBizClock 클래스를 이용하면 테스트 코드의 시간을 원하는 시점으로 제어할 수 있다  
+
+```java
+public class MemberTest {
+    TestBizClock testClock = new TestBizClock();
+    
+    @AfterEach
+    void resetClock() {
+        testClock.reset();
+    }
+    
+    @Test
+    void notExpired() {
+        testClock.setNow(LocalDateTime.of(2019, 1, 1, 13, 0, 0));
+        LocalDateTime expiry = LocalDateTime.of(2019, 12, 31, 0, 0, 0);
+        Member m = Member.builder().expiryDate(expiry).build();
+        assertFalse(m.isExpired());
+    }
+}
+```
+
+이제 이 테스트 코드는 실행 시점에 상관없이 결과가 동일하다  
+또한, 테스트 시점을 제어할 수 있으므로 '2019년 12월 31일 1마이크로초'와 같은 시점도 쉽게 테스트할 수 있다
+
+
+### 랜덤하게 실패하지 않기
+
+실행 시점에 따라 테스트가 실패하는 또 다른 예는 랜덤 값을 사용하는 것이다  
+랜덤 값에 따라 달라지는 결과를 검증할 때 주로 이런 문제가 발생한다  
+예를 들어 숫자 야구 게임을 위한 Game 클래스가 생성자에서 Random을 이용해서 숫자를 생성한다고 하자  
+
+```java
+public class Game {
+    private int[] nums;
+    
+    public Game() {
+        Random random = new Random();
+        int firstNo = random.nextInt(10);
+        ...
+        this.nums = new int[] { firstNo, secondNo, thirdNo };
+    }
+    
+    public Score guess(int ... answer) {
+        ...생략
+    }
+}
+```
+
+Game을 테스트하는 코드를 작성해보자. 아무것도 일치하지 않는 경우를 테스트하고 싶어도 테스트 코드를 작성할 수가 없다  
+정답이 랜덤하게 만들어져서 어떤 숫자를 넣어야 일치하지 않는지 미리 알 수 없기 때문이다  
+
+```java
+@Test
+void noMatch() {
+    Game g = new Game();
+    Score s = g.guess(?, ?, ?); // 테스트를 통과시킬 수 있는 값이 매번 바뀜
+    assertEquals(0, s.strikes());
+    assertEquals(0, s.balls());
+}
+```
+
+랜덤하게 생성한 값이 결과 검증에 영향을 준다면 구조를 변경해야 테스트가 가능하다  
+Game 같은 경우는 직접 랜덤 값을 생성하지 말고 생성자를 통해 값을 받도록 수정하면 테스트가 가능해진다  
+
+```java
+public class Game {
+    private int[] nums;
+    
+    public Game(int[] nums) {
+        ...값 확인 코드
+        this.nums = nums;
+    }
+}
+```
+
+또는 랜덤 값 생성을 다른 객체에 위임하게 바꿔도 된다  
+예를 들어 게임 숫자 생성을 위한 클래스를 별도로 만든다
+
+```java
+public class GameNumGen {
+    public int[] generate() {
+        ...랜덤하게 값 생성
+    }
+}
+```
+
+이제 Game 클래스는 GameNumGen을 이용해서 랜덤 값을 구하도록 변경한다  
+
+```java
+public class Game {
+    private int[] nums;
+    
+    public Game(GameNumGen gen) {
+        nums = gen.generate();
+    }
+}
+```
+
+테스트 코드는 GameNumGen의 대역을 사용해서 원하는 값을 갖고 Game 클래스를 테스트 할 수 있다  
+
+```java
+@Test
+void noMatch() {
+    // 랜덤 값 생성을 별도 타입으로 분리하고
+    // 이를 대역으로 대체해서 대체
+    GameNumGen gen = mock(GameNumGen.class);
+    Given(gen.generate()).willReturn(new int[] {1, 2, 3});
+    
+    Game g = new Game(gen);
+    Score s = g.guess(4, 5, 6);
+    assertEquals(0, s.strikes());
+    assertEquals(0, s.balls());
+}
+```
+
+---
+
+## 필요하지 않은 값은 설정하지 않기
+
+중복 아이디를 가진 회원은 가입할 수 없다는 것을 검증하기 위한 테스트 코드
+
+**검증할 범위에 필요하지 않은 값까지 설정하는 테스트**
+
+```java
+@Test
+void dupIdExists_Then_Exception() {
+    // 동일 ID가 존재하는 상황
+    memoryRepository.save(
+      User.builder().id("dupid").name("이름").
+              .email("abc@abc.com")
+              .passworkd("abcd")
+              .regDate(LocalDateTime.now())
+              .build()
+    );
+    
+    RegisterReq req = RegisterReq.builder()
+      .id("dupid").name("다른이름")
+      .email("dupid@abc.com")
+      .password("abcde")
+      .build()
+    
+    assertThrows(DupIdException.class,
+        () -> userRegisterSvc.register(req)
+    )
+}
+```
+
+이 테스트 코드를 잘못 만든 것은 아니지만 검증할 내용에 비하면 필요하지 않은 값까지 설정하고 있다  
+이 테스트는 동일 ID가 존재하는 경우 가입할 수 없는지를 검증하는 것이 목적이기 때문에 동일 ID가 존재하는 상황을 만들 때  
+이메일, 이름, 가입일과 같은 값은 필요하지 않다  
+RegisterReq 객체를 생성할 때에도 검증에 필요한 겂만 지정하면 된다  
+
+**테스트에 필요한 값만 설정**
+
+```java
+@Test
+void dupIdExists_Then_Exception() {
+    // 동일 ID가 존재하는 상황
+    memoryRepository.save(User.builder().id("dupid").build());
+    
+    RegisterReq req = RegisterReq.builder()
+      .id("dupid")
+      .build()
+        
+    assertThrows(DupIdException.class,
+        () -> userRegisterSvc.register(req)
+    )
+}
+```
+
+테스트에 필요한 값만 설정하면 필요하지 않은 값을 설정하느라 고민할 필요가 없다  
+또한, 테스트 코드가 짧아져서 한눈에 내용을 파악할 수 있다  
+
+
+### 단위 테스트를 위한 객체 생성 보조 클래스
+
+단위 테스트 코드를 작성하다 보면 상황 구성을 위해 필요한 데이터가 다소 복잡할 때가 있다  
+예를 들어 설문에 답변하는 기능을 구현하기 위해 다음에 해당하는 설문이 존재하는 상황이 필요하다고 가정하자  
+
+- 설문이 공개 상태임
+- 설문 조사 기간이 끝나지 않음
+- 설문 객관식 문항이 두 개임
+- 각 객관식 문항의 보기가 두 개임
+
+테스트 코드는 상황을 구성하기 위해 다음과 같은 코드를 사용해야 한다  
+null이면 안 되는 필수 속성이 많다면 상황 구성 코드는 더 복잡해질 것이다
+
+```java
+@Test
+void answer() {
+    memorySurveyRepository.save(
+        Survey.builder().id(1L)
+          .status(SurveyStatus.OPEN)
+          .endOfPeriod(LocalDateTime.now()).plusDays(5))
+          .questions(
+              asList(
+                  new Question(1, "질문1", asList(Item.of(1, "보기1"), Item.of(2, "보기2"))),
+                  new Question(1, "질문2", asList(Item.of(1, "답1"), Item.of(2, "답2")))
+              )
+           ).build()
+    );
+
+    answerService.answer(...생략);
+    ...생략
+}
+```
+
+테스트를 위한 객체 생성 클래스를 따로 만들면 이런 복잡함을 줄일 수 있다  
+다음은 테스트 코드에서 필요한 객체를 생성할 때 사용할 수 있는 팩토리 클래스의 예를 보여준다
+
+```java
+public class TestSurveyFactory {
+    public static Survey createAnswerableSurvey(Long id) {
+        return Survey.builder()
+          .id(id)
+          .status(SurveyStatus.OPEN)
+          .endOfPeriod(LocalDateTime.now()).plusDays(5))
+          .questions(
+              asList(
+                  new Question(1, "질문1", asList(Item.of(1, "보기1"), Item.of(2, "보기2"))),
+                  new Question(1, "질문2", asList(Item.of(1, "답1"), Item.of(2, "답2")))
+              )
+          ).build()
+    }
+}
+```
+
+TestSurveyFactory는 답변 가능한 상태인 Survey 객체를 생성한다  
+답변 가능한 설문이 필요한 테스트 코드는 이 팩토리 클래스를 이용해서 간결하게 상황을 구성할 수 있다  
+
+```java
+@Test
+void answer() {
+    memorySurveyRepository.save(
+        TestSurveyFactory.createAnswerableSurvey(1L)
+    );
+}
+```
+
+답변 가능한 Survey 객체뿐만 아니라 기간이 지난 Survey, 아직 설문을 시작하지 않은 Survey등을 팩토리가 제공하게 함으로써  
+테스트 코드에서 다양한 상황을 간단하게 구성할 수 있다  
+
+빌더 패턴을 사용하면 유연함을 더할 수 있다  
+다음은 테스트용 객체를 생성하는 기능을 빌더 패턴으로 구현하는 예를 보여준다  
+
+```java
+public class TestSurveyBuilder {
+    private Long id = 1L;
+    private String title = "제목";
+    private LocalDateTime endOfPeriod = LocalDateTime.now().plusDays(5);
+    private List<Question> questions = asList(
+        new Question(1, "질문1", asList(Item.of(1, "보기1"), Item.of(2, "보기2"))),
+        new Question(1, "질문2", asList(Item.of(1, "답1"), Item.of(2, "답2")))
+    );
+    private SurveyStatus status = SurveyStatus.READY;
+    ...필수 속성에 대한 기본 값
+  
+    public TestSurveyBuilder id(Long id) {
+        this.id = id;
+        return this;
+    }
+    
+    public TestSurveyBuilder title(String value) {
+        this.title = value;
+        return this;
+    }
+    
+    public TestSurveyBuilder open() {
+        this.status = SurveyStatus.OPEN;
+        return this;
+    }
+    ...생략(questions(), endOfPeriod()) 등 메서드
+    
+    public Survey build() {
+        return Survey.builder()
+          .id(id).title(title).status(status)
+          .endOfPeriod(endOfPeriod)
+          .questions(questions)
+          ...생략
+          .build()
+    }
+}
+```
+
+TestSurveyBuilder 클래스의 필드는 기본값을 가지며 id(), title(), open() 등의 메서드는 기본값을 지정한 값으로 변경한다  
+build() 메서드는 해당 필드를 이용해서 Survey 객체를 생성한다  
+따라서 TestSurveyBuilder를 사용하면 기본 값 대신에 변경하고 싶은 속성만 설정할 수 있다  
+
+```java
+memorySurveyRepo.save(new TestSurveyBuilder().title("새로운 제목").open().build());
+```
+
+빌더를 사용하면 코드의 간결함은 유지하면서 팩토리 메서드에 비해 유연하게 값을 변경할 수 있는 장점이 있다  
+
+
+> 파라미터의 기본값을 지원하는 언어와 팩토리 메서드  
+> 코틀린은 파라미터에 기본값을 줄 수 있고 메서드를 호출할 때 파라미터 이름을 이용해서 값을 전달할 수 있다  
+> 이런 언어를 사용하면 빌더와 팩토리 메서드를 하나로 합칠 수 있다  
+
+```kotlin
+fun createTestSurvey(
+        id: Long = 1L, title: String = "제목", status = SurveyStatus.READY,
+        endOfPeriod: LocalDateTime = LocalDateTime.now().plusDays(5),
+        questions: List<Question> = listOf(
+            Question(1, "질문1", listOf(Item(1, "보기1"), Item(1, "보기2"))),
+            Question(2, "질문2", listOf(Item(1, "답1"), Item(1, "답2")))
+        )
+): Survey {
+    return Survey.build()
+        .id(id).title(title).status(status)
+        .endOfPeriod(endOfPeriod)
+        ...생략
+        .build()
+}
+
+// 다음은 위 함수를 이용해서 상황을 구성하는 테스트 코드 작성 예
+@Test
+fun answer() {
+    memorySurveyRepository.save(
+        createTestSurvey(id = 10L, status = SurveyStatus.OPEN)
+    )
+}
+
+```
+
+---
+
+## 조건부로 검증하지 않기
+
+테스트는 성공하거나 실패해야 한다. 테스트가 성공하거나 실패하려면 반드시 단언을 실행해야 한다  
+만약 조건에 따라서 단언을 하지 않으면 그 테스트는 성공하지도 실패하지도 않은 테스트가 된다  
+
+**조건에 따라 단언을 하지 않는 테스트**
+
+```java
+@Test
+void canTranslateBasicWord() {
+    Translator tr = new Translator();
+    if (tr.contains("cat")) { // true가 아니면 실행하지 않음
+        assertEquals("고양이", tr.translate("cat"));
+    }
+}
+```
+
+만약 이 코드의 목적이 'cat' 정도의 기본 단어는 번역을 할 수 있어야 한다는 것을 테스트하는 것이 목적이라면 이는 문제가 된다  
+왜냐면 `tr.contains("cat")`가 `false`를 리턴하면 테스트가 실패하지 않기 때문이다  
+
+다음은 비슷한 잘못을 저지르는 테스트 코드의 예를 보여준다  
+
+```java
+@Test
+void firstShoulBeAdminItem() {
+    givenAdminItem(...);
+    givenUserItem(...);
+    
+    List<Item> items = itemService.getItems();
+    
+    if (items.size() > 0) { // item.size()가 0보다 클 때만 실행
+        assertEquals(ItemType.ADMIN, items.get(0).getType());
+        assertEquals(ItemType.USER, items.get(1).getType());
+    }
+}
+```
+
+만약 `givenAdminItem()` 메서드나 `givenUserItem()` 메서드를 잘못 수정해서 `itemService.getItems()`가 빈 List를 리턴하면 이 테스트 코드는 단언을 실행하지 않는다  
+단언을 실행하지 않으면 테스트는 통과한 것처럼 보인다  
+
+두 예는 실패해야 하는데 조건문 때문에 테스트가 실패하지 않는 문제가 있다  
+이런 문제가 발생하지 않으려면 조건에 대한 단언도 추가해야 한다  
+
+**조건도 단언을 하도록 수정**
+
+```java
+@Test
+void canTranslateBasicWord(){
+    Translator tr=new Translator();
+    assertTranslationOfBasicWord(tr,"cat");
+}
+
+private void assertTranslationOfBasicWord(Translator tr, String word) {
+    assertTrue(tr.contains("cat"));   
+    assertEquals("고양이", tr.translate("cat"));
+}
+```
+
+`tr.translate("cat")`를 단언하기에 앞서 `tr.contains("cat")`이 `true`인지 검사한다  
+이렇게 함으로써 실패한 테스트를 놓치는 것을 방지할 수 있다  
+
+단언을 실행할 조건으로 List의 크기를 사용한 테스트 코드도 다음과 같이 변경할 수 있다  
+이를 List의 크기에 따라 실패해야 할 테스트가 실패하게 만들 수 있다  
+
+```java
+@Test
+void firstShoulBeAdminItem() {
+    givenAdminItem(...);
+    givenUserItem(...);
+    
+    List<Item> items = itemService.getItems();
+    
+    assertTrue(items.size() > 0);
+    assertEquals(ItemType.ADMIN, items.get(0).getType());
+    assertEquals(ItemType.USER, items.get(1).getType());
+}
+```
+
+
+---
+
+## 통합 테스트는 필요하지 않은 범위까지 연동하지 않기
+
+```java
+@Component
+public class MemberDao {
+    private JdbcTemplate jdbcTemplate;
+    
+    public MemberDao(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+    
+    public List<Member> selectAll() {
+        ...생략
+    }
+}
+```
+
+이 코드는 스프링 JdbcTemplate을 이용해서 데이터를 연동하고 있다  
+스프링 부트 프로젝트를 사용한다면 다음과 같은 코드를 이용해서 DB 연동 테스트를 진행할 수 있다  
+
+```java
+@SpringBootTest
+public class MemberDaoIntTest {
+    @Autowired
+    MemberDao dao;
+    
+    @Test
+    void findAll() {
+        List<Member> members = dao.selectAll();
+        assertTrue(members.size() > 0);
+    }
+}
+```
+
+이 테스트 코드는 잘못 만들지는 않았지만 한 가지 단점이 있다  
+테스트하는 대상은 DB와 연동을 처리하는 MemberDao인데 `@SpringBootTest` 애노테이션을 사용하면 서비스, 컨트롤러등 모든 스프링 빈을 초기화한다는 것이다  
+DB 관련된 설정 외에 나머지 설정도 처리하ㅓ므로 스프링을 초기화하는 시간이 길어질 수 있다  
+
+스프링 부트가 제공하는 `@JdbcTest` 애노테이션을 사용하면 DataSource, JdbcTemplate 등 DB 연동과 관련된 설정만 초기화한다  
+다른 빈을 생성하지 않으므로 스프링을 초기화하는 시간이 짧아진다
+
+**@JdbcTest 애노테이션을 이용하는 예**
+
+```java
+@JdbcTest
+@AutoConfigureTestDatabase = AutoConfigureTestDatabase.Replace.NONE)
+public class MemberDaoJdbcTest {
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+    
+    private MemberDao dao;
+    
+    @BeforeEach
+    void setUp() {
+        dao = new MemberDao(jdbcTemplate);
+    }
+    
+    @Test
+    void findAll() {
+        ...생략
+    }
+}
+```
+
+이 코드는 MemberDao 객체를 직접 생성하고 있지만 대신 확인에 필요한 스프링 설정만 초기화하고 테스트할 수 있는 장점이 있다  
+
+DataSource와 JdbcTemplate을 테스트 코드에서 직접 생성하면 스프링 초기화 과정이 빠지므로 테스트 시간은 더 짧아질 것이다  
+
+
+---
+
+## 더 이상 쓸모 없는 테스트 코드
+
+```java
+// LocalDateTime의 포맷팅 방법을 익히기
+@Test
+void format() {
+    LocalDateTime dt = LocalDateTime.of(2019, 8, 15, 12, 0, 0);
+    assertEquals(
+        "2019-08-15 12:00:00",
+        dt.format(DateTimeFormattr.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    );
+}
+```
+ 
+
+```java
+// LocalDate를 사용할 때 2020년 1월 31일에서 한 달을 더하면 2020년 2월 29일이 나오는지 확인
+@Test
+void diff() {
+    LocalDate date = LocalDate.of(2020, 1, 31);
+    assertEquals(LocalDate.of(2020, 2, 29), date.plusMonths(1));
+}
+```
+
+이런 테스트 코드는 사용법을 익히고 나면 더 이상 필요가 없다  
+소프트웨어가 제공할 기능을 검증하는 코드도 아니기 때문에 테스트 코드를 유지해서 얻을 수 있는 이점도 없다  
+이렇게 특정 클래스의 사용법을 익히기 위해 작성한 테스트 코드는 오래 유지할 필요가 없으므로 삭제한다  
+
+단지 테스트 커버리지를 높이기 위한 목적으로 작성한 테스트 코드도 유지할 필요가 없다  
+코드 품질을 측정하는 수단으로 테스트 커버리지를 많이 사용하는데 이 수치를 높이기 위해 다음과 같은 테스트 코드를 작성할 때가 있다  
+
+```java
+@Test
+void testGetter() {
+    User user = new User(1L, "이름");
+    assertEquals(1L, user.getId());
+    assertEquals("이름", user.getName());
+}
+
+// User 클래스
+public class User {
+    private Long id;
+    private String name;
+    ...생략
+  
+    public Long getId() {
+        return id;
+    }
+    
+    public String getName() {
+        return name;
+    }
+}
+```
+
+이 코드에서 User 클래스의 `getId()` 메서드나 `getName()` 메서드는 매우 단순해서 메서드를 검증할 목적으로 테스트 코드를 작성할 필요가 없다  
+이 테스트 코드는 단지 테스트 커버리지를 높이기 위해서 존재할 뿐이다  
+이런 테스트 코드 역시 실제 코드 유지보수에는 아무 도움이 되지 않으므로 삭제한다  
+테스트 커버리지를 높여야 한다면 실제로 테스트 코드가 다루지 않는 if-else나 하위 타입 등을 찾아 테스트를 추가해야 한다  
+그래야 의미 있는 테스트 커버리지 측정값을 얻을 수 있다  
+
+> 테스트 커버리지  
+> 테스트 커버리지(test coverage)란 테스트하는 동안 실행하는 코드가 얼마나 되는지 설명하기 위해 사용하는 지표로 보통 비율을 사용한다  
+> 예를 들어 단순하게 계산하면 한 메서드의 길이가 10줄인데 테스트하는 동안 8줄의 코드를 실행한다면 이때 테스트 커버리지는 80%가 된다  
+> 물론 if-else 블록, 하위 타입, 반복문 등이 존재하므로 테스트 커버리지를 구하는 것은 복잡하다
