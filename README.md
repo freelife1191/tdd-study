@@ -2577,3 +2577,992 @@ public class User {
 > 테스트 커버리지(test coverage)란 테스트하는 동안 실행하는 코드가 얼마나 되는지 설명하기 위해 사용하는 지표로 보통 비율을 사용한다  
 > 예를 들어 단순하게 계산하면 한 메서드의 길이가 10줄인데 테스트하는 동안 8줄의 코드를 실행한다면 이때 테스트 커버리지는 80%가 된다  
 > 물론 if-else 블록, 하위 타입, 반복문 등이 존재하므로 테스트 커버리지를 구하는 것은 복잡하다
+
+---
+
+## Chapter 11. 마치며
+
+### 테스트 우선과 스트레스
+
+많은 개발자가 일정 압박에 시달린다. 빨리 구현해야 한다는 압박은 높은 스트레스를 주며 이는 본인이 만든 코드를 충분히 테스트하지 않고 다음 기능을 구현하게 만든다.  
+코드를 충분히 테스트하지 않으면 버그를 포함할 가능성이 커진다. 구현한 코드를 제대로 테스트하지 못했다는 사실 또한 스트레스를 증가시킨다.
+
+시간이 흐를수록 스트레스는 점점 커지고 개발자의 피로감도 증가 한다. 충분하지 않은 테스트와 피로감은 판단력을 흐리게 해서 소프트웨어의 품질을 점점 망가뜨린다.  
+또한, 코드의 품질을 돌볼 여력이 없기에 코드는 점점 복잡해지고 가독성은 떨어진다.
+
+그야말로 악순환이다. 개발이 진행될수록 악순환은 커지며 QA를 거치면서 악순환은 절정에 달한다.  
+개발 과정에서 충분한 테스트를 하지 못했으므로 QA 시점에 많은 버그가 쏟아져 나온다. 바그를 하나 잡으면 다른 새로운 버그가 만들어지는 일도 발생한다.  
+이 과정에서 개발자의 스트레스는 극에 달한다.
+
+```mermaid
+---
+title: 스트레스는 테스트를 하지 않게 만들고 이는 다시 스트레스 증가로 이어진다
+---
+flowchart LR
+    A(압박) --> B(스트레스 증가) --> C(테스트 안함) --> B
+```
+
+TDD를 적용하면 이런 상황을 바꿀 수 있다 
+
+- 테스트를 먼저 작성해야 한다는 간단한 규칙을 통해 이로운 개발 주기를 만들 수 있다  
+- 테스트를 먼저 작성하면 적어도 해당 테스트를 통과한 만큼은 코드를 올바르게 구현했다는 사실을 알 수 있다 
+- 테스트가 증가할수록 코드에 대한 신뢰도 함께 증가한다
+  - 이는 개발자의 스트레스를 줄여주고 심리적 안정을 준다  
+
+```mermaid
+---
+title: 테스트 코드는 스트레스를 줄여준다
+---
+flowchart LR
+  A(압박) --> B(스트레스 증가) --> C(테스트 작성) --> D(구현, 테스트 통과) --> E(버그 감소\n신뢰 증가) --> F(스트레스 감소) --> C
+```
+
+- 테스트 코드는 회귀 테스트로 사용할 수 있다
+  - 코드를 수정하거나 새로 추가할 때 앞서 작성한 테스트 코드를 사용하면 다른 기능에 문제가 없는지 바로 확인할 수 있다  
+- 테스트 코드는 안전장치가 되어 변경한 코드로 인해 소프트웨어가 비정상적으로 동작하는 것을 사전에 막아준다  
+- 테스트 코드를 만든다고 완벽하게 버그를 없앨 수는 없지만, 테스트 코드가 다루는 범위가 넓을수록 버그가 발생할 가능성도 줄여준다  
+  - 버그 수정도 더 쉬워진다. 버그가 발생하는 상황에 대한 테스트 코드를 추가하고 이를 통과시키면 된다  
+  - 버그를 고치는 과정에서 발생할 수 있는 새로운 버그를 놓치지 않을까 걱정할 필요도 없다  
+  - 새로운 버그가 발생하면 다른 테스트를 실행하는 과정에서 알아낼 수 있기 때문이다  
+
+> 회귀 테스트(Regression test)
+> 회귀 테스트는 개발하고 테스트한 소프트웨어가 이후에 코드를 수정해도 기존 코드가 올바르게 동작하는지 확인하기 위한 테스트이다  
+> 
+> 소프트웨어를 변경하면 이전에 고쳤던 결함이 재발되거나 새로운 결함이 발생하는 일이 종종 발생한다.  
+> 그래서 결함을 발견하면 결함을 수정하고 이를 확인할 테스트를 만든다.  
+> 이렇게 만든 테스트를 소프트웨어가 바뀔 때마다 실행해서 결함이 재발하지 않는지 확인한다
+
+
+### TDD 전파하기
+
+TDD가 어느 정도 몸에 붙으면 다음의 효과를 느낄 수 있다
+
+- 결함 감소
+- 스트레스 감소
+- 빠른 피드백
+
+이런 효과를 혼자서만 누리는 것이 아깝게 느껴지면 TDD를 동료, 팀, 회사에 전파하고 싶어질 것이다.  
+하지만 무턱대고 TDD를 밀어붙이면 안 된다. 이는 오히려 TDD 전파를 방해할 수 있다  
+
+TDD를 경험하지 않은 사람의 입장에서 TDD는 완전히 다른 방식이다. 이들은 그동안 만들지 않던 테스트 코드를 만드는 것 자체가 개발 시간을 늘린다고 생각한다.  
+이런 사람들은 TDD가 주는 이점을 설명해도 이해하지 못한다. 또한, 수동으로 테스트하는 시간과 버그를 잡기 위해 노력하는 시간도 개발 시간에 포함된다는 사실을 인지 못하는 경우도 있다.  
+나아가 스스로 아직 TDD에 익숙하지 않은 상태에서 남들에게 TDD를 해야 한다고 강요한다면 오히려 TDD 때문에 개발이 느려진다고 공격받을 수 있다
+
+그래서 TDD를 전파하려면 본인이 먼저 TDD에 익숙해져야 한다. 그전까지는 전파에 조심해야 한다. 아직 TDD가 익숙하지 않다면 먼저 개인 프로젝트를 통해 TDD를 연마해야 한다.  
+잘 못하는 상태에서 회사 업무에 TDD를 적용하다가 일정에 영향을 주기 시작하면 주변 동료나 상사에게 부정적인 시각을 주어 전파할 기회를 잡을 수 없게 된다.  
+
+TDD가 익숙해지기 시작하면 업무에 적용한다. 이 시점이 되면 테스트 코드를 왜 만드냐는 주변의 물음에 더 적은 결함, 더 적은 스트레스, 더 빠른 개발이라는 실질적인 결과를 보여줄 수 있다.  
+TDD의 이점을 누릴 수 있게 되면 주변에서 뭐라고 하건 신경 쓰지 말자. 일단 혼자만이라도 TDD의 이점을 개발에 녹여 넣어야 한다.  
+물론 100% TDD로 개발할 수는 없겠지만 할 수 있는 한 많은 범위를 TDD로 개발하는 것이 중요하다  
+
+> 동조자 찾기
+> 동조자가 있으면 함께 해야 한다. 함께 할 사람이 있으면 지속할 수 있는 힘이 생긴다.  
+> 동료와 함꼐 코드를 작성하고 리뷰하다 보면 테스트 코드를 만드는 역량도 증가하고 힘도 날 것이다
+
+#### 짝 코딩을 통한 전파
+
+하나둘 TDD에 관심을 두는 동료가 생기면 이들이 TDD에 입문할 수 있도록 도와야 한다. TDD를 못하는 주된 이유가 TDD를 하는 방법을 모르기 때문이다.  
+이런 개발자에게 TDD를 전파하는 가장 좋은 방법은 짝 코딩을 하는 것이다. 짝코딩을 진행한다면 다음이 가능하다
+
+- 테스트 코드를 만들고 실행하는 방법을 보여준다
+- 대역을 생성하고 사용하는 방법을 보여준다
+- 무엇보다 실제 업무에서 다루는 코드로 TDD를 경험하게 한다
+
+동료가 직접 테스트 코드를 만들지 못하는 상태라면 테스트 코드를 만들고 통과시키는 것까지 모두 직접 진행한다.  
+이 과정에서 동료가 눈으로 TDD를 경험하게 만든다  
+
+동료의 눈에 TDD가 조금씩 들어오기 시작하면 이제 테스트 코드만 만들고 동료가 테스트를 통과시키게 한다.  
+한 번에 많은 코드를 만들려고 하면 테스트를 통과시키는데 필요한 코드만 만들어야 하는 점을 상기시킨다
+
+그다음은 테스트 코드를 동료가 직접 만들게 한다. 이때가 가장 어렵다. 조금씩 도움을 주면서 테스트 코드를 만들 수 있게 유도한다.  
+처음은 어렵겠지만 하나둘 테스트 코드를 추가하다 보면 점차 테스트 코드를 만드는 실력이 좋아진다
+
+남이 작성한 테스트 코드를 보기만 하는 것과 테스트 코드를 실제로 실행하고 그 결과를 체험하는 것은 다르다.  
+짝 코딩은 직접 테스트 코드를 경험하게 함으로써 테스트 코드 작성에 대한 거부감을 줄이고 테스트 코드가 주는 이점을 느낄 수 있는 기회를 제공한다  
+
+#### 레거시 코드에 대한 테스트 추가
+
+레거시 코드처럼 TDD를 하기 힘든 코드는 테스트 코드라도 만들어보자. 레거시에 대한 테스트가 쌓이면 어떻게 테스트 코드를 만들어야 할지 감이 잡히기 시작한다.  
+테스트 코드를 만들기 힘들다면 일부 코드를 리팩토링해서 테스트 코드를 만들 수 있는 구조로 변경해야 한다.  
+테스트 코드 없이 리팩토링을 수행한다는 것은 위험하지만 앞으로 영원히 테스트 코드를 만들지 못하는 것보다 약간의 위험을 감수하더라도 테스트 코드를 만들 수 있게 리팩토링을 감행하는 것이 낫다고 생각한다
+
+자주 사용하는 방법은 테스트 코드를 만들고 싶은 코드를 별도 클래스로 분리하는 것이다.  
+그런 뒤에 분리한 클래스에 대해 테스트 코드를 작성한다. 분리하는 코드의 범위가 작을수록 테스트를 만들기도 쉬워진다.  
+
+
+![11-1](docs/image/11-1.jpg)
+
+> 레거시 코드는 일부 코드를 별도 타입으로 분리하는 방식으로 테스트 코드를 만들 수 있다  
+
+이렇게 점진적으로 코드를 분리하고 테스트 코드를 만드는 과정을 반복하면 이미 동작하는 기능에 대한 영향은 최소화하면서 테스트를 추가할 수 있다.  
+테스트를 추가하는 만큼 리팩토링, 기능 변경, 테스트 추가가 더욱 수월해진다  
+
+> 레거시 코드에 대해 테스트를 작성하는 방법이 궁금한 독자는 다음 책을 읽어보자  
+> - Working Effectively with Legacy Code (번역서: 레거시 코드 활용 전략)
+> 많은 영감을 얻을 수 있을 것이다
+
+일단 레거시 코드에 테스트가 들어가기 시작하면 이제 테스트 코드를 이용해서 동료들과 협업할 수 있게 된다.  
+예를 들면 테스트 코드를 이용해서 코드의 동작 방식을 설명할 수 있게 되고 수정사항이 들어오면 검증할 수 있는 테스트 코드를 같이 작성하고 이를 통과시키는 방식으로 협업이 가능해진다  
+
+### TDD와 개발 시간
+
+TDD를 경험하지 않은 개발자는 다음과 같은 이야기로 TDD 적용을 반대한다  
+
+- 개발할 시간도 없는데 언제 테스트 코드를 작성하냐?
+
+얼핏 들으면 그럴듯하지만 실제로는 그렇지 않다. 오히려 개발 시간에 대한 이해가 부족한 개발자가 이런말을 할 때가 많다. 개발 시간은 크게 세 가지로 나눌 수 있다  
+
+- 처음 코딩 시간
+- 테스트 시간
+- 디버깅 시간
+
+특정 기능을 구현하기 위해 코딩을 하면 그 뒤에는 그 기능을 잘 구현했는지 확인하기 위해 테스트를 해야 한다.  
+테스트를 수행하는 과정에서 문제를 발견하면 원인을 찾기 위해 디버깅을 한다. 디버깅하는 과정에서 다시 코드를 수정하고 테스트를 하고 디버깅을 한다.  
+이 과정은 개발을 완료할 때까지 반복된다. 즉 개발시간은 테스트 전까지의 코딩 시간과 테스트 시간 그리고 문제를 없애기 위한 디버깅 시간을 포함한다
+
+```mermaid
+---
+title: 코딩 -> 테스트 -> 디버깅은 개발을 완료할 때까지 반복된다
+---
+flowchart LR
+    A(코딩) --> B(테스트) --> C(디버깅) --> A
+```
+
+전체 개발 시간을 줄이려면 코딩 시간뿐만 아니라 테스트 시간과 디버깅 시간을 줄여야 한다. 코딩만 한다고 개발 시간이 줄지는 않는다는 것이다.  
+테스트가 필요없을 만큼 한 번에 완벽하게 구현할 수 있으면 좋겠지만 이는 아주 간단한 기능을 개발할 때나 가능한 일이다.  
+코드를 만들면 결국 만든 코드가 올바르게 동작하는지 테스트해야 한다. 이 테스트를 수동으로 진행하면 개발이 진행될수록 테스트 시간은 길어진다.  
+왜냐면 기능은 점점 많아지고 복잡해지기 때문이다
+
+테스트 시간을 줄이려면 테스트를 자동화해야 하는데 테스트를 자동화한다는 것은 테스트를 수행하는 코드를 만든다는 것을 의미한다.  
+테스트 시간을 줄이려면 테스트 코드를 만들어야 하는 것이다. TDD는 처음부터 테스트 코드를 만들기 때문에 반복적인 테스트 시간을 줄여준다.  
+처음에는 개발 시간을 늘리는 것처럼 보이는 테스트 코드가 뒤로 갈수록 반복되는 테스트 시간을 줄여주어 오히려 개발 시간을 줄여주는 것이다
+
+코드를 작성한 시점과 테스트를 하는 시점에 차이가 날수록 어떤 문제가 발생했을 때 원인을 찾는 데 시간이 필요하다.  
+아무리 코드를 잘 만들었다 해도 코드를 다시 읽고 분석해야 하기 때문이다. 반면에 TDD는 기능을 구현하자마자 테스트를 진행한다.  
+바로 전에 코드를 작성했기 때문에 테스트에 실패해도 원인을 빨리 찾을 수 있다. 즉 TDD는 디버깅 시간을 줄여준다
+
+```mermaid
+flowchart LR
+    A(테스트 코드 작성\n- 자동화된 테스트로 사용\n테스트 시간 감소) --> B(구현 및 테스트 통과\n- 한번에 하나만 집중해서 구현 시간 감소\n- 즉각적인 테스트로 디버깅 시간 감소) --> C(리팩토링) --> A
+```
+
+또한, TDD는 리팩토링을 포함한다. 리팩토링을 통해 코드 구조와 가독성을 개선한다. 코드 개선은 향후 코드 수정과 추가를 쉽게 할 수 있게 해 준다.  
+즉 리팩토링은 미래의 코딩 시간을 줄여준다  
+
+이렇게 TDD를 활용하면 테스트 시간, 디버깅 시간, 코딩 시간이 줄어 전반적인 개발 시간을 줄일 수 있다  
+
+> 테스트와 개발 시간 이야기
+> 몇 년 전의 일이다. 동료 개발자가 DB에서 데이터를 조회해서 엑셀 파일로 만들어 제공하는 기능을 개발하고 있었다.  
+> 이 기능을 개발하기 위해 동료 개발자는 다음과 같은 과정을 반복하면서 코드를 작업하고 있었다.  
+> 
+> 1. 디버깅 또는 코드 구현
+> 2. 톰캣 실행, 브라우저 실행
+> 3. 폼 화면 이동, 폼 전송
+> 4. 에러 발생, 과정 1로 이동
+> 5. 다운로드한 엑셀 확인 후 이상 발견, 과정 1로 이동
+> 
+> 동료 개발자와 같이 이 작업을 수행하면서 순서를 다음과 같이 바꾸었다. 
+> 
+> 1. DB 조회 기능에 대한 테스트 작성 -> 통과할 때까지 구현
+> 2. 엑셀 파일 생성하는 코드에 대한 테스트 작성 -> 통과할 때까지 구현
+> 3. 컨트롤에서 파일 다운로드 처리 테스트 작성 -> 통과할 때까지 구현
+> 4. 마지막으로 톰캣 구동하고 브라우저 실행해서 테스트 진행
+> 
+> 1~3번 과정은 테스트 코드를 통해서 빠르게 기능을 실행하고 검증할 수 있었다. 불필요하게 톰캣을 구동하거나 브라우저를 띄울 필요가 없었다.
+> 테스트 대상이 명확해 집중해서 구현하고 디버깅할 수 있게 되어 개별 요소에 대한 개발 시간을 단축할 수 있었다
+> 
+> 마지막으로 4번 과정에서 기능 테스트를 수행했다.  
+> 이미 1~3번 과정에서 주요 코드에 대한 테스트를 마쳤기 때문에 4번 과정에서는 빠르게 수정할 수 있는 사소한 오류만 발생했다
+
+### 맺음말
+
+TDD는 마치 운도오가도 같다. 운동을 꾸준히 하면 건강해지고 체력이 좋아지는 것처럼 TDD도 꾸준히 연습하고 적용해야 실력이 늘고 효과를 볼 수 있다.  
+초반에 힘들다고 바로 포기하면 오히려 안 하는 것만 못하다. 처음엔 쉬운 것을 TDD로 시도해서 TDD에 익숙해지고 이후에 점진적으로 TDD 적용 범위를 늘려나가자.  
+지속적으로 TDD를 갈고 닭다 보면 머지 않은 미래에 TDD가 주는 효과를 느끼게 될 것이다. 그러니 TDD가 습관이 될 때까지 연습하고 또 연습하자
+
+---
+
+## 부록 A. JUnit 5 추가 내용
+
+### 조건에 따른 테스트
+
+JUnit 5는 조건에 따라 테스트를 실행할지 여부를 결정하는 기능을 제공 한다  
+이 Annotation은 `org.junit.jupiter.api.condition` 패키지에 속해 있다 
+
+- `@EnabledOnOs`, `@DisabledOnOs`
+  - 테스트 메서드가 특정 운영체제에서만 동작해야될 때 사용
+
+```java
+public class OsTmpPathTest {
+    @Test
+    @EnabledOnOs(OS.WINDOWS)
+    void windowTmpPath() {
+        Path tmpPath = Paths.get("C:\\Temp");
+        assertTrue(Files.isDirectory(tmpPath));
+    }
+    
+    @Test
+    @EnabledOnOs(OS.LINUX)
+    void linuxTmpPath() {
+        Path tmpPath = Paths.get("/tmp");
+        assertTrue(Files.isDirectory(tmpPath));
+    }
+}
+```
+
+- `@EnabledOnJre`, `@DisabledOnJre`
+  - 자바 버전에 따라 테스트를 실행하고 싶을때 사용
+  - 8~LTS 까지 정의 7, 6은 JRE.OTHER 로 사용 가능
+
+```java
+@Test
+@EnabledOnJre({JRE.JAVA_8, JRE.JAVA_9, JRE.JAVA_10, JRE.JAVA_11})
+void testOnJre() {
+    assertEquals(LocalDate.of(1919, 3, 1), LocalDate.of(2019, 3, 1).minusYears(100));
+}
+```
+
+- `@EnabledIfSystemProperty`, `@DisabledIfSystemProperty`
+  - 시스템 프로퍼티 값을 비교하여 테스트 실행 여부를 결정
+  - named 속성은 시스템 프로퍼티의 이름을 지정하고 matches 속성에는 값의 일치 여부를 검사할 때 사용할 정규 표현식을 지정
+
+```java
+/**
+ * java.vm.name 시스템 프로퍼티 값이 OpenJDK를 포함하고 있으면 해당 테스트를 실행
+ */
+@Test
+@EnabledIfSystemProperty(named = "java.vm.name", matches = ".*OpenJDK.*")
+void openJdk() {
+    assertEquals(2, 1 + 1);
+}
+```
+
+- `@EnabledIfEnvironmentVariable`, `@DisabledIfEnvironmentVariable`
+  - SystemProperty와 비슷하지만 named 속성에 환경변수 이름을 사용한다
+
+
+### 태깅과 필터링
+
+- `@Tag` 애노테이션은 테스트에 태그를 달 때 사용
+  - 클래스와 테스트 메서드에 적용할 수 있음
+
+```java
+import org.junit.jupiter.api.Tag;
+
+@Tag("intergration")
+public class TagTest {
+    
+    @Tag("very-slow")
+    @Test
+    void verySlow() {
+        int result = someVerySlowOp();
+        assertEquals(result, 0);
+    }
+}
+```
+
+태그의 이름은 다음 규칙을 따라야 함
+
+- `null` 이거나 공백이면 안 된다
+- 좌우 공백을 제거한 뒤에 공백을 포함하면 안 된다
+- ISO 제어 문자를 포함하면 안 된다
+- 다음 글자를 포함하면 안 된다 `,()&|!`
+
+`@Tag`를 사용하면 Maven이나 Gradle에서 실행할 테스트를 선택할 수 있다
+
+```xml
+<plugin>
+  <artifactId>maven-surefire-plugin</artifactId>
+  <version>2.22.1</version>
+  <configuration>
+    <!-- 실행에 포함할 태그 지정 -->
+    <groups>integration</groups>
+    <!-- 테스트 대상에서 제외할 태그 -->
+    <excludedGroups>slow | very-slow</excludedGroups>
+  </configuration>
+</plugin>
+```
+
+```groovy
+test {
+  useJUnitPlatform {
+    includeTags 'integration' // 실행에 포함할 태그 지정
+    excludeTags 'slow | very-slow' // 테스트 대상에서 제외할 태그
+  }
+}
+```
+
+테스트에 포함할 대상이나 제외 대상을 지정할 떄 태그 식을 사용
+
+- `!`: NOT 연산, 예) `!integration`
+- `&`: AND 연산, 예) `slow & mock-server`
+- `|`: OR 연산, 예) `slow | very-slow`
+
+
+### 중첩 구성
+
+`@Nested` 애노테이션을 사용해 중첩 클래스에 테스트 메서드를 추가
+
+```java
+import org.junit.jupiter.api.Nested;
+
+public class Outer {
+    @BeforeEach void outerBefore() { }
+    @Test void outer() { }
+    @AfterEach void outerAfter() { }
+    @Nested
+    class NestedA {
+        @BeforeEach void nestedBefore() { }
+        @Test void nested1() { }
+        @AfterEach void nestedAfter() { }
+    }
+}
+```
+
+위 코드를 기준으로 중첩 클래스의 테스트 메서드인 `nested1()`을 실행하는 순서
+
+- Outer 객체 생성
+- NestedA 객체 생성
+- outerBefore() 메서드 실행
+- nestedBefore() 메서드 실행
+- nested1() 테스트 메서드 실행
+- nestedAfter() 메서드 실행
+- outerAfter() 메서드 실행
+
+중첩된 클래스는 내부 클래스이므로 외부 클래스의 멤버에 접근할 수 있다  
+이 특징을 활용하면 상황별로 중첩 테스트 클래스를 분리해서 테스트 코드를 구성할 수 있다  
+
+```java
+public class UserServiceTest {
+    private MemoryUserRepository memoryRepo;
+    private UserService userService;
+    
+    @BeforeEach
+    void setup() {
+        memoryRepo = new MemoryUserRepository();
+        userService = new UserService(memoryRepo);
+    }
+    
+    @Nested
+    class GivenUser {
+        @BeforeEach
+        void givenUser() {
+            memoryRepo.save(new User("user", "name"));
+        }
+        
+        @Test
+        void dupId() { ... }
+        @Nested
+        class GivenNoDupId {
+          ...
+        }
+    }
+}
+```
+
+### 테스트 메시지
+
+```java
+List<Integer> ret = getResults();
+List<Integer> expected = Arrays.asList(1, 2, 3);
+for (int i = 0; i < expected.size(); i++) {
+    assertEquals(expected.get(i), ret.get(i));
+}
+```
+
+루프를 도는 과정에서 값 검증에 실패하면 다음과 같은 검증 실패 메시지가 출력됨
+
+```
+org.opentest4j.AssertionFailedError:
+Expected: 2
+Actual: 6
+```
+
+설명 문자열을 사용하면 몇 번째 요소에서 실패 했는지 쉽게 알 수 있다
+
+```java
+List<Integer> ret = getResults();
+List<Integer> expected = Arrays.asList(1, 2, 3);
+for (int i = 0; i < expected.size(); i++) {
+    assertEquals(expected.get(i), ret.get(i), "ret[" + i + "]");
+}
+```
+
+```
+org.opentest4j.AssertionFailedError: ret[1] ==>
+Expected: 2
+Actual: 6
+```
+
+### `@TempDir` 애노테이션을 이용한 임시 폴더 생성
+
+ JUnit 5.4 버전에 추가된 `@TempDir` 애노테이션을 사용하면 임시 폴더 관련 작업을 테스트 코드에서 쉽게 처리할 수 있다  
+ `@TempDir` 애노테이션을 필드 또는 라이프사이클 관련 메서드나 테스트 메서드의 파라미터로 사용하면 JUnit은 임시 폴더를 생성하고  
+ `@TempDir` 애노테이션을 붙인 필드나 파라미터에 임시 폴더 경로를 전달한다  
+ `@TempDir` 애노테이션은 File 타입이나 Path 타입에 적용할 수 있다  
+ 
+```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+
+public class TempDirTest {
+    @TempDir
+    File tempFolder;
+    
+    @Test
+    void fileTest() {
+        // tempFolder에 파일 생성 등 작업
+    }
+}
+```
+
+위 코드는 File 타입의 tempFolder 필드에 `@TempDir` 애노테이션을 적용했다  
+이 경우 테스트 메서드를 실행하기 전에 임시 폴더를 생성하고 그 폴더 정보를 tempFolder 필드에 할당한다  
+
+필드에 적용하면 각 테스트 메서드를 실행할 때마다 임시 폴더를 생성한다  
+만약 특정 테스트 메서드에서만 임시 폴더를 생성해서 사용하고 싶다면 테스트 메서드의 파라미터에 `@TempDir` 애노테이션을 적용하면 된다 
+
+```java
+@Test
+void fileTest(@TempDir Path tempFolder) {
+    ...테스트 코드
+}
+```
+
+테스트를 실행한 뒤에는 생성한 임시 폴더를 삭제한다. 물론 이 과정에서 임시 폴더에 작성한 파일도 함께 삭제한다  
+
+특정 테스트 클래스 단위로 임시 폴더를 생성하고 싶다면 정적 필드에 `@TempDir` 애노테이션을 붙인다  
+정적 필드에 `@TempDir` 애노테이션을 적용하면 각 테스트 메서드마다 임시 폴더를 생성하지 않는다  
+대신 테스트 클래스의 모든 테스트 메서드를 실행하기 전에 임시 폴더를 한번 생성하고 모든 테스트 메서드의 실행이 끝난 뒤에 임시 폴더를 삭제한다
+
+```java
+public class TempDirTest {
+    @TemDir
+    static File tempFolderPerClass;
+    
+    ...생략
+}
+```
+
+정적 필드 대신 `@BeforeAll` 메서드의 파라미터에 `@TempDir` 애노테이션을 적용해도 된다  
+
+```java
+public class TempDirTest {
+    @BeforeAll
+    static void setup(@TempDir File tempFolder) {
+        ...
+    }
+}
+```
+
+### `@Timeout` 애노테이션을 이용한 테스트 실행 시간 검증
+
+`@Timeout` 애노테이션언 JUnit 5.5 버전부터 지원하는 애노테이션으로 `@Timeout` 애노테이션을 사용하면 테스트가 일정 시간 내에 실행되는지 검증할 수 있다  
+
+```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+
+public class TimeoutTest {
+    @Test
+    @Timeout(1) // 테스트 메서드가 1초 이내에 실행되는지 검증
+    void sleep2seconds() throws InterruptedException {
+        Thread.sleep(2000); // 2초 동안 실행을 멈추므로 이 테스트의 실행은 1초를 초과해서 실패하게 됨
+    }
+}
+```
+
+실패 메시지
+
+```
+java.util.concurrent.TimeoutException: sleep2seconds() timed out after 1 second
+```
+
+초가 아닌 다른 시간 단위를 사용하고 싶다면 unit 속성에 TimeUnit 값을 지정하면 된다
+
+```java
+@Test
+@Timeout(value = 500, unit = TimeUnit.MILLISECONDS)
+void sleep40Mills() throws InterruptedException {
+    Thread.sleep(40);
+}
+```
+
+---
+
+## 부록 B. JUnit 4 기초
+
+### 의존 설정
+
+JUnit 5는 자바 8이나 그 이상의 버전을 필요로 하지만, JUnit 5는 자바 1.5 이상에서 동작한다
+
+JUnit 4 모듈 구성
+
+Maven
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.12</version>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+```
+
+Gradle
+
+```groovy
+dependencies {
+  testImplementation 'junit:junit:4.12'
+}
+
+test {
+  useJUnit()
+}
+```
+
+### 기본 테스트 애노테이션
+
+JUnit 4의 기본 테스트 애노테이션은 `@Before`, `@Test`, `@After` 이다
+
+```java
+package appb;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class AppTest {
+    @Before
+    public void setUp() {
+        
+    }
+    
+    @Test
+    public void plus() {
+        assertEquals(2, 1 + 1);
+    }
+    
+    @After
+    public void tearDown() {
+        
+    }
+}
+```
+
+JUnit 5 애노테이션 대응
+
+- `@Before` -> JUnit 5의 `@BeforeEach`
+- `@Test` -> Junit 5의 `@Test`
+- `@After` -> Junit 5의 `@AfterEach`
+
+테스트 메서드는 JUnit 5와 동일하게 다음 순서로 실행한다
+
+1. 테스트 클래스 객체 생성
+2. `@Before` 메서드 실행
+3. `@Test` 메서드 실행
+4. `@After` 메서드 실행
+
+JUnit 5와 달리 JUnit의 테스트 메서드는 `public`이어야 한다. `@Before`, `@After` 애노테이션도 `public` 메서드를 붙여야 한다
+
+### 단언 메서드
+
+`org.junit.Assert` 클래스는 `assertEquals()`를 포함한 기본적인 검증 메서드를 제공한다
+
+| 메서드                                               | 설명                                          |
+|---------------------------------------------------|---------------------------------------------|
+| `assertEquals(expected, actual)`                  | 실제 값(actual)이 기대하는 값(expected)과 같은지 검사한다    |
+| `assertNotEquals(unexpected, actual)`             | 실제 값(actual)이 특정 값(unexpected)과 같지 않은지 검사한다 |
+| `assertSame(Object expected, Object actual)`      | 두 객체가 동일한 객체인지 검사한다                         |
+| `assertNotSame(Object unexpected, Object actual)` | 두 객체가 동일하지 않은 객체인지 검사한다                     |
+| `assertTrue(boolean condition)`                   | 값이 true인지 검사한다                              |
+| `assertFalse(boolean condition)`                  | 값이 false인지 검사한다                             |
+| `assertNull(Object actual)`                       | 값이 null인지 검사한다                              |
+| `assertNotNull(Object actual)`                    | 값이 null이 아닌지 검사한다                           |
+| `fail()`                                           | 테스트를 실패 처리한다                                |
+
+
+JUnit 4는 `assertAll()` 이나 `assertThrows()`는 제공하지 않는다  
+
+JUnit 4에서 익셉션 발생 여부를 테스트할 때에는 `@Test` 애노티에션의 expected 속성을 사용한다
+
+```java
+@Test(expected = ArithmeticException.class)
+public void throwEx() {
+    divide(1, 0)
+}
+```
+
+발생한 익셉션 객체를 사용해서 추가 검증을 해야 할 때는 expected 속성을 사용할 수 없다  
+대신 `try-catch`를 사용해서 직접 검증 처리를 해야 한다
+
+```java
+ArithmeticException thrown = null;
+try {
+    divide(1, 0);
+} catch(ArithmeticException ex) {
+    thrown = ex;
+}
+assertNotNull(thrown);
+assertTrue(thrown.getMessage().contains("zero"));
+```
+
+---
+
+## 부록 C. Mockito 기초 사용법
+
+Mockito는 모의 객체 생성, 검증, 스텁을 지원하는 프레임워크이다  
+
+### 의존 설정
+
+Maven
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.junit.jupiter</groupId>
+    <artifactId>junit-jupiter</artifactId>
+    <version>5.4.0</version>
+    <scope>test</scope>
+  </dependency>
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-core</artifactId>
+    <version>2.26.0</version>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+```
+
+Gradle
+
+```groovy
+dependencies {
+  testImplementation('org.junit.jupiter:junit-jupiter:5.4.0')
+  testImplementation('org.mockito:mockito-core:2.26.0')
+}
+```
+
+### 모의 객체 생성
+
+`Mockito.mock()` 메서드를 이용하면 특정 타입의 모의 객체를 생성할 수 있다
+
+**`Mockito.mock()` 메서드를 이용한 모의 객체 생성**
+
+```java
+import static org.mockito.Mockito.mock;
+
+public class GameGenMockTest {
+    @Test
+    void mockTest() {
+        GameNumGen genMock = mock(GameNumGen.class);
+    }
+}
+```
+
+`Mockito.mock()` 메서드는 클래스, 인터페이스, 추상 클래스에 대해 모의 객체를 생성할 수 있다
+
+```java
+public interface GameNumGen {
+    String generate(GameLevel level);
+}
+```
+
+### 스텁 설정
+
+모의 객체를 생성한 뒤에는 `BDDMockito` 클래스를 이용해서 모의 객체에 스텁을 구성할 수 있다  
+
+**`BDDMockito.given()`을 이용한 스텁 설정**
+
+```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+public class GameGenMockTest {
+    @Test
+    void mockTest() {
+        GameNumGen genMock = mock(GameNumGen.class);
+        // BDDMockito.given() 메서드는 스텁을 정의할 모의 객체의 메서드 호출을 전달
+        given(genMock.generate(GameLevel.EASY))
+                .willReturn("123"); // willReturn() 메서드는 스텁을 정의한 메서드가 리턴할 값을 지정한다
+        // genMock.generate(GameLevel.EASY) 메서드가 불리면 "123"을 리턴하라고 설정한다
+        String num = genMock.generate(GameLevel.EASY);
+        assertEquals("123", num);
+    }
+}
+```
+
+모의 객체 `generate()` 메서드를 실행한다. 이때 인자로 `GameLevel.EASY`를 전달하고 있는데 이는 `given()`에서 지정한 메서드 인자와 일치하므로  
+`genMock.generate(GameLevel.EASY)` 코드는 "123"을 리턴한다
+
+**Mockito를 이용한 모의 객체 생성과 스텁 설정**
+```java
+// 1. 모의 객체 생성
+GameNumGen genMock = mock(GameNumGen.class);
+// 2. 스텁 설정
+given(genMock.generate(GameLevel.EASY)).willReturn("123");
+// 3. 스텁 설정에 매칭되는 메서드 실행
+String num = genMock.generate(GameLevel.EASY);
+```
+
+지정한 값을 리턴하는 대신에 익셉션을 발생하게 설정할 수도 있다  
+
+**특정 타입의 익셉션을 발생하도록 스텁 설정**
+
+```java
+@Test
+void mockThrowTest() {
+    GameNumGen genMock = mock(GameNumGen.class);
+    given(genMock.generate(null)).willThrow(IllegalArgumentException.class);
+    
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> genMock.generate(null));
+    )
+}
+```
+
+타입 대신에 익셉션 객체를 인자로 받는 `willThrow()` 메서드를 사용해도 된다
+
+```java
+given(genMock.generate(null)).willThrow(IllegalArgumentException.class);
+```
+
+리턴 타입이 void인 메서드에 대해 익셉션을 발생하려면 `BDDMockito.willThrow()` 메서드로 시작한다
+
+**`BDDMockito.given()`을 이용한 스텁 설정**
+
+```java
+import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.mock;
+
+public class voidMethodStubTest {
+    @Test
+    void voidMethodWillThrowTest() {
+        List<String> mockList = mock(List.class);
+        // BDDMockito.willThrow() 메서드는 발생할 익셉션 타입이나 익셉션 객체를 인자로 받는다
+        willThrow(UnsupportedOperationException.class)
+                // given() 메서드는 모의 객체를 전달받는다. 모의 객체의 메서드 실행이 아닌 모의 객체임에 유의하자
+                // given() 메서드는 인자로 전달받은 모의 객체 자신을 리턴하는데 이때 익셉션을 발생할 메서드를 호출한다
+                .given(mockList)
+                // 실제로 모의 객체의 메서드를 호출하지 않는다
+                // 단지 익셉션을 발생할 모의 객체를 설정하는 것뿐이다
+                .clear();
+        
+        assertThrows(
+            UnsupportedOperationException.class,
+                () -> mockList.clear()
+        );
+    }
+}
+```
+
+#### 인자 매칭 처리
+
+```java
+given(genMock.generate(GameLevel.EASY)).willReturn("123");
+String num = genMock.generate(GameLevel.NORMAL);
+```
+
+이 코드는 스텁을 설정할 때 `generate()` 메서드의 인자로 `GameLevel.EASY`를 전달하고 있는데 실제로 `generate()` 메서드를 호출할 때는 `GameLevel.NORMAL`을 인자로 전달했다  
+이 경우 `genMock.generate(GameLevel.NORMAL)` 코드는 스텁을 설정할 때 사용한 인자와 일치하지 않으므로 "123"이 아닌 `null`을 리턴한다
+
+> **Mockito**는 일치하지 않는 스텁 설정이 없을 경우 리턴 타입의 기본 값을 리턴한다  
+> 예를 들어 리턴 타입이 `int`면 `0`을 리턴하고 `boolean`이면 `false`를 리턴한다  
+> 기본 데이터 타입이 아닌 `String`이나 `List`와 같은 참조 타입이면 `null`을 리턴한다
+
+`org.mockito.ArgumentMatchers` 클래스를 사용하면 정확하게 일치하는 값 대신 임의의 값에 일치하도록 설정할 수 있다  
+
+**`ArgumentMatchers.any()` 메서드로 인자 값 매칭 처리**
+
+```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+
+
+public class AnyMatcherTest {
+  @Test
+  void anyMatchTest() {
+    GameNumGen genMock = mock(GameNumGen.class);
+    // 스텁을 설정할 때 ArgumentMatchers.any() 메서드를 인자 위치에 전달
+    // 이 메서드를 사용하면 모든 값에 일치하도록 스텁을 설정한다 generate() 메서드는 모두 "456"을 리턴
+    given(genMock.generate(any())).willReturn("456");
+    
+    String num = genMock.generate(GameLevel.EASY);
+    assertEquals("456", num);
+
+    String num2 = genMock.generate(GameLevel.NORMAL);
+    assertEquals("456", num2);
+  }
+}
+```
+
+**Mockito** 클래스와 **BDDMockito** 클래스는 **ArgumentMatchers** 클래스를 상속하고 있으므로 `ArgumentMatchers.any()` 대신에 `Mockito.any()`나 `BDDMockito.any()`를 사용해도 된다  
+
+**ArgumentMatchers** 클래스는 `any()` 외에도 다음의 메서드를 제공한다
+
+- `anyInt()`, `anyShort()`, `anyLong()`, `anyByte()`, `anyChar()`, `anyDouble()`, `anyFloat()`, `anyBoolean()`: 기본 데이터 타입에 대한 임의 값 일치
+- `anyString()`: 문자열에 대한 임의 값 일치
+- `any()`: 임의 타입에 대한 일치
+- `anyList()`, `anySet()`, `anyMap()`, `anyCollection()`:임의 콜렉션에 대한 일치
+- `matches(String)`, `matches(Pattern)`: 정규표현식을 이용한 String 값 일치 여부
+- `eq(값)`: 특정 값과 일치 여부
+
+스텁을 설정할 메서드의 인자가 두 개 이상인 경우 주의할 점이 있다
+
+```java
+List<String> mockList = mock(List.class);
+given(mockList.set(anyInt(), "123")).willReturn("456");
+String old = mockList.set(5, "123");
+```
+
+`mockList.set()` 메서드의 스텁을 설정할 때 첫 번째 인자는 `anyInt()` 메서드를 이용해서 임의의 `int` 값에 일치하도록 했고 두 번째 인자는 "123" 값을 사용해서 정확한 값에 일치하도록 했다  
+그리고 `mockList.set(5, "123")` 코드를 실행하고 있다. 이 코드는 문제 없이 동작할 것 같지만 실제로 `mockList.set(5, "123")` 코드를 실행하면 익셉션이 발생한다  
+
+**ArgumentMatchers**의 `anyInt()`나 `any()` 등의 메서드는 내부적으로 인자의 일치 여부를 판단하기 위해 **ArgumentMatcher**를 등록한다  
+**Mockito**는 한 인자라도 **ArgumentMatcher**를 사용해서 설정한 경우 모든 인자를 **ArgumentMatcher**를 이용해서 설정하도록 하고 있다  
+
+임의의 값과 일치하는 인자와 정확하게 일치하는 인자를 함께 사용하고 싶다면 `ArgumentMatchers.eq()` 메서드를 사용해야 한다
+
+**임의 값 일치와 정확한 값 일치가 필요한 경우 `eq()` 메서드를 사용**
+
+```java
+@Test
+void mixAnyAndEq() {
+    List<String> mockList = mock(List.class);
+    
+    given(mockList.set(anyInt(), eq("123"))).willReturn("456");
+    
+    String old = mockList.set(5, "123");
+    assertEquals("456", old);
+}
+```
+
+
+### 행위 검증
+
+모의 객체의 역할 중 하나는 실제로 모의 객체가 불렸는지 검증하는 것이다
+
+**모의 객체의 메서드가 불렸는지 여부를 검증하는 코드**
+
+```java
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+
+public class GameTest {
+    @Test
+    void init() {
+        GameNumGen genMock = mock(GameNumGen.class);
+        Game game = new Game(genMock);
+        game.init(GameLevel.EASY);
+        
+        then(genMock).should().generate(GameLevel.EASY);
+    }
+}
+```
+
+`BDDMockito.then()`은 메서드 호출 여부를 검증할 모의 객체를 전달 받는다  
+`should()` 메서드는 모의 객체의 메서드가 불려야 한다는 것을 설정하고 `should()` 메서드 다음에 실제로 불려야 할 메서드를 지정한다  
+`genMock` 모의 객체의 `generate()` 메서드가 `GameLevel.EASY` 인자를 사용해서 호출되었는지 검증한다
+
+정확한 값이 아니라 메서드가 불렸는지 여부가 중요하다면 `any()`, `anyInt()` 등을 사용해서 인자를 지정하면 된다
+
+```java
+then(genMock).should().generate(any());
+```
+
+정확하게 한 번만 호출된 것을 검증하고 싶다면 `should()` 메서드에 `Mockito.only()`를 인자로 전달한다
+
+```java
+then(genMock).should(only()).generate(any());
+```
+
+메서드 호출 횟수를 검증하기 위해 Mockito 클래스가 제공하는 메서드
+
+- `only()`: 한 번만 호출
+- `times(int)`: 지정한 횟수만큼 호출
+- `never()`: 호출하지 않음
+- `atLeast(int)`: 적어도 지정한 횟수만큼 호출
+- `atLeastOnce()`: `atLeast(1)`과 동일
+- `atMost(int)`: 최대 지정한 횟수만큼 호출
+
+
+### 인자 캡쳐
+
+단위 테스트를 실행하다보면 모의 객체를 호출할 때 사용한 인자를 검증해야 할 때가 있다  
+`String`이나 `int`와 같은 타입은 쉽게 겁증할 수 있지만 많은 속성을 가진 객체는 쉽게 검증하기 어렵다  
+이럴 때 사용할 수 있는 것이 인자 캡처이다
+
+**Mockito**의 **ArgumentCaptor**를 사용하며 ㄴ메서드 호출 여부를 검증하는 과정에서 실제 호출할 때 전달한 인자를 보관할 수 있따
+
+**ArgumentCaptor를 이용한 모의 객체 메서드 호출 인자 사용**
+
+```java
+import org.mockito.ArgumentCaptor;
+
+public class UserRegisterMockTest {
+    private UserRegister userRegister;
+    private EmailNotifier mockEmailNotifier = mock(EmailNotifier.class);
+    
+    ...생략
+  
+    @DisplayName("가입하면 메일을 전송함")
+    @Test
+    void whenRegisterThenSendMail() {
+        userRegister.register("id", "pw", "email@email.com");
+      
+        // String 타입의 인자를 보관할 수 있는 ArgumentCaptor를 생성
+        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
+        // 모의 객체 호출 여부를 검증하는 코드에서 인자로 전달
+        // 인자로 전달할 때는 ArgumentCaptor#captor() 메서드를 전달
+        then(mockEmailNotifier).should().sendRegisterEmail(captor.capture());
+        
+        // 모의 객체를 실행할 때 사용한 인자는 ArgumentCaptor#getValue() 메서드로 구할 수 있다
+        String realEmail = captor.getValue();
+        // 이렇게 구한 겂을 검증에 사용하면 된다
+        assertEquals("email@email.com", realEmail);
+    }
+}
+```
+
+### JUnit 5 확장 설정
+
+**Mockito** 의 JUnit 5의 확장 기능을 사용하면 애노테이션을 이용해서 모의 객체를 생성할 수 있다  
+확장 기능을 사용하려면 `mockito-junit-jupiter` 의존을 추가해야 한다
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.mockito</groupId>
+    <artifactId>mockito-junit-jupiter</artifactId>
+    <version>2.26.0</version>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+```
+
+의존을 추가 했다면 **MockitoExtension** 확장을 사용할 수 있다  
+이 확장 기능을 사용하면 `@Mock` 애노테이션을 붙인 필드에 대해 자동으로 모의 객체를 생성해 준다
+
+**JUnit 5 확장 기능을 통한 `@Mock` 애노테이션으로 모의 객체 생성**
+
+```java
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+@ExtendWith(MockitoExtension.class)
+public class JUnit5ExtensionTest {
+    @Mock
+    private GameNumGen genMock; // genMock 필드에 GameNumGen 타입에 대한 모의 객체를 할당한다
+}
+```
