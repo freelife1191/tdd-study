@@ -3566,3 +3566,390 @@ public class JUnit5ExtensionTest {
     private GameNumGen genMock; // genMock 필드에 GameNumGen 타입에 대한 모의 객체를 할당한다
 }
 ```
+
+---
+
+## 부록 D. AssertJ 소개
+
+### AssertJ 사용 이유
+
+JUnit은 테스트 실행을 위한 프레임워크를 제공하지만 한 가지 부족한 점이 있다. 그것은 바로 단언에 대한 표현력이 붖ㄱ호다는 점이다
+
+```java
+assertTrue(id.contains("a"));
+```
+
+`assertTrue()`는 인자가 `true`인지 검사한다. 전달하는 `id.contains("a")` 코드는 id가 "a"를 포함하고 있으면 `true`를 리턴한다  
+즉 이 코드는 id가 "a"를 포함하고 있는지 여부를 검사한다. 하지만 단언 코드는 값이 `true`인지 여부를 확인하는 `assertTrue()`를 사용하고 있어 실제 검사하는 내용을 표현하고 있지 않다  
+
+단언에 실패했을 떄 표시되는 실패 메시지는 다음과 같다
+
+```
+org.opentest4j.AssertionFailedError: expected: <true> but was: <false>
+```
+
+이 실패 메시지는 `true`와 `false`를 보여줄 뿐 id가 "a"를 포함하고 있지 않아서 테스트에 실패했다는 사실은 알려주지 않는다
+
+**AssertJ**를 사용하면 위 코드를 다음과 같이 바꿀 수 있다
+
+```java
+assertThat(id).contains("a");
+```
+
+이 코드는 id가 "a"를 포함하는지 여부를 검사한다는 것을 바로 알 수 있다. 테스트에 실패했을 때 보여주는 에러 메시지도 다음과 같다
+
+```java
+java.lang.AssertionError:
+Expecting:
+<"bcd">
+to contain:
+<"a">
+```
+
+에러 메시지를 보면 "bcd"가 "a"를 포함할 거라고 기대했지만 그렇지 않다는 것을 알 수 있다.  
+`assertTrue(id.contains("a"))` 코드를 사용했을 때 메시지에 `true`와 `false`만 나왔던 것과 비교하면 실패한 원인을 보다 정확하게 알 수 있다  
+
+**AssertJ**를 사용하면 테스트 코드의 표현력이 높아질 뿐만 아니라 개발 도구의 자동 완성 기능을 활용할 수 있다  
+코드 자동 완성을 통해 검증에 사용할 메서드를 쉽게 선택할 수 있다  
+
+**AssertJ**가 제공하는 **assertThat(String)** 메서드는 **AbstractStringAssert**를 리턴하는데 이 클래스는 `contains()`, `containsOnlyDigits()`를 포함해 다양한 문자열 검증 메서드를 제공하고 있다  
+이렇게 **AssertJ**는 타입별로 다양한 검증 메서드를 제공하고 있어 테스트 코드를 더욱 쉽게 작성할 수 있게 한다  
+
+### 의존 설정
+
+**AssertJ**를 사용하려면 `assert-core` 모듈을 의존에 추가하면 된다
+
+Maven
+```xml
+<dependencies>
+  <dependency>
+    <groupId>org.assertj</groupId>
+    <artifactId>assertj-core</artifactId>
+    <version>3.11.1</version>
+    <scope>test</scope>
+  </dependency>
+</dependencies>
+```
+
+그레이들을 사용한다면 다음 의존을 추가한다
+
+```groovy
+testCompile("org.assertj:assertj-core:3.11.1")
+```
+
+**AssertJ** 3 버전은 자바 8 이상 버전을 필요로 한다
+
+
+### AssertJ 기본 사용법
+
+**AssertJ** 기본 사용법은 다음과 같다
+
+```java
+assertThat(실제값).검증메서드(기대값)
+```
+
+`assertThat()` 메서드는 `org.assertj.core.api.Assertions` 클래스에 정적 메서드로 정의되어 있다  
+주요 타입별로 `assertThat()` 메서드가 존재하며 타입에 따라 다른 검증 메서드를 제공한다  
+
+#### 기본 검증 메서드
+
+가장 기본적인 검증 메서드는 `isEqualsTo()` 메서드이다
+
+```java
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class BasicTest {
+    @Test
+    void sumTest() {
+        int value = sum(2, 2);
+        assertThat(value).isEqualTo(4);
+    }
+    
+    private int sum(int a, int b) {
+        return a + b;
+    }
+}
+```
+
+`isEqualTo()`를 포함해 거의 모든 타입에 사용할 수 있는 검증 메서드는 다음과 같다
+
+- `isEqualTo(값)`: 값과 같은지 검증한다
+- `isNotEqualTo(값)`: 값과 같지 않은지 검증한다
+- `isNull()`: `null`인지 검증한다
+- `isNotNull()`: `null`이 아닌지 검증한다
+- `isIn(값 목록)`: 값 목록에 포함되어 있는지 검증한다
+- `isNotIn(값 목록)`: 값 목록에 포함되어 있지 않은지 검증한다
+
+`isIn()`과 `isNotIn()`의 값 목록은 가변 인자로 주거나 `List`와 타입(정확하게는 Iterable을 구현하는 타입)을 이용해서 전달한다
+
+`Comparable` 인터페이스를 구현한 타입이나 `int`, `double`과 같은 숫자 타입의 경우 다음 메서드를 이용해서 값을 검증할 수 있다
+
+- `isLessThan(값)`: 값보다 작은지 검증한다
+- `isLessThanOrEqualTo(값)`: 값보다 작거나 같은지 검증한다
+- `isGreaterThan(값)`: 값보다 큰지 검증한다
+- `isGreaterThanOrEqualTo(값)`: 값보다 크거나 같은지 검증한다
+- `isBetween(값1, 값2)`: 값1과 값2 사이에 포함되는지 검증한다
+
+`boolean`, `Boolean` 타입을 위한 검증 메서드는 다음 두 개가 존재한다
+
+- `isTrue()`: 값이 `true`인지 검증한다
+- `isFalse()`: 값이 `false`인지 검증한다
+
+### String에 대한 추가 검증 메서드
+
+`String` 타입을 위한 검증 메서드는 다양한 형태가 존재한다. 먼저 특정 값을 포함하는지 검사하는 메서드는 다음과 같다
+
+- `contains(CharSequence... values)`: 인자로 지정한 문자열들을 모두 포함하고 있는지 검증한다
+- `containsOnlyOnce(CharSequence sequence)`: 해당 문자열을 딱 한 번만 포함하는지 검증한다
+- `containsOnlyDigits()`: 숫자만 포함하는지 검증한다
+- `containsWhitespaces()`: 공백 문자를 포함하고 있는지 검증한다
+- `containsOnlyWhitespaces()`: 공백 문자만 포함하는지 검증한다. 공백 문자 여부는 `Character#isWhitespace()` 메서드를 따른다
+- `containsPattern(CharSequence regex)`: 지정한 정규 표현식에 일치하는 문자를 포함하는지 검증한다
+- `containsPattern(Pattern pattern)`: 지정한 정규 표현식에 일치하는 문자를 포함하는지 검증한다
+
+포함하지 않는지 여부를 확인하는 메서드도 있다
+
+- `doesNotContain(CharSequence... values)`: 인자로 지정한 문자열들을 모두 포함하고 있지 않은지 검증한다
+- `doesNotContainAnyWhitespaces()`: 공백 문자를 포함하고 있지 않은지를 검증한다
+- `doesNotContainOnlyWhitespaces()`: 공백 문자만 포함하고 있지 않은지를 검증한다
+- `doesNotContainPattern(Pattern pattern)`: 정규 표현식에 일치하는 문자를 포함하고 있지 않은지를 검증한다
+- `doesNotContainPattern(CharSequence pattern)`: 정규 표현식에 일치하는 문자를 포함하고 있지 않은지를 검증한다
+
+특정 문자열로 시작하거나 끝나는지 검증할 때에는 다음 메서드를 사용한다
+
+- `startsWith(CharSequence prefix)`: 지정한 문자열로 시작하는지를 검증한다
+- `doesNotStartWith(CharSequence prefix)`: 지정한 문자열로 시작하지 않는지를 검증한다
+- `endsWith(CharSequence suffix)`: 지정한 문자열로 끝나는지를 검증한다
+- `doesNotEndWith(CharSequence suffix)`: 지정한 문자열로 끝나지 않는지를 검증한다
+
+#### 숫자에 대한 추가 검증 메서드
+
+숫자 타입에 대해서 추가로 지원하는 주요 검증 메서드는 다음과 같다
+
+- `isZero()`/`isNotZero()`: 0인지 또는 0이 아닌지를 검증한다
+- `isOne()`: 1인지를 검증한다
+- `isPositive()`/`isNotPositive()`: 양수인지 또는 양수가 아닌지를 검증한다
+- `isNegative()`/`isNotNegative()`: 음수인지 또는 음수가 아닌지를 검증한다
+
+#### 날짜/시간에 대한 검증 메서드
+
+다음 `LocalDateTime`이 특정 시간 이후인지를 검증한다
+
+```java
+LocalDateTime regDt = user.getRegDt();
+assertThat(regDt).isAfter(LocalDateTime.of(2019, 1, 31, 23, 59, 59));
+```
+
+다음은 `isAfter()`를 포함해 날짜와 시간을 비교하는 주요 메서드이다  
+`LocalDateTime`, `LocalDate`, `Date` 등 날짜와 시간 관련된 타입에 대해 비교할 값은 같은 타입이다
+
+- `isBefore(비교할 값)`: 비교할 값보다 이전인지 검증한다
+- `isBeforeOrEqualTo(비교할 값)`: 비교할 값보다 이전이거나 같은지 검증한다
+- `isAfter(비교할 값)`: 비교할 값보다 이후인지 검증한다
+- `isAfterOrEqualTo(비교할 값)`: 비교할 값보다 이후이거나 같은지 검증한다
+
+`LocalDateTime`, `OffsetDateTime`, `ZonedDateTime` 타입은 다음의 검증 메서드를 추가로 제공한다
+
+- `isEqualToIgnoringNanos(비교할 값)`: 나노 시간을 제외한 나머지 값이 같은지 검증한다. 즉 초 단위까지 값이 같은지 검증한다
+- `isEqualToIgnoringSeconds(비교할 값)`: 초 이하 시간을 제외한 나머지 값이 같은지 검증한다. 즉 분 단위까지 값이 같은지 검증한다
+- `isEqualToIgnoringMinutes(비교할 값)`: 분 이하 시간을 제외한 나머지 값이 같은지 검증한다. 즉 시 단위까지 값이 같은지 검증한다
+- `isEqualToIgnoringHours(비교할 값)`: 시 이하 시간을 제외한 나머지 값이 같은지 검증한다. 즉 일 단위까지 값이 같은지 검증한다
+
+#### 콜렉션에 대한 검증 메서드
+
+`List`, `Set` 등 콜렉션에 대한 주요 검증 메서드는 다음과 같다
+
+- `hasSize(int expected)`: 콜렉션의 크기가 지정한 값과 같은지 검증한다
+- `contains(E ... values)`: 콜렉션이 지정한 값을 포함하는지 검증한다
+- `containsOnly(E ... values)`: 콜렉션이 지정한 값만 포함하는지 검증한다
+- `containsAnyOf(E ... values)`: 콜렉션이 지정한 값 중 일부를 포함하는지 검증한다
+- `containsOnlyOnce(E ... values)`: 콜렉션이 지정한 값을 한 번만 포함하는지 검증한다
+
+다음은 Map을 위한 주요 검증 메서드이다
+
+- `containsKey(K key)`: `Map`이 지정한 키를 포함하는지 검증한다
+- `containsKeys(K... keys)`: `Map`이 지정한 키들을 포함하는지 검증한다
+- `containsOnlyKeys(K... keys)`: `Map`이 지정한 키만 포함하는지 검증한다
+- `doesNotContainKeys(K... keys)`: `Map`이 지정한 키들을 포함하지 않는지 검증한다
+- `containsValues(VALUE... values)`: `Map`이 지정한 값들을 포함하는지 검증한다
+- `contains(Entry<K,V>... values)`: `Map`이 지정한 `Entry<K,V>`를 포함하는지 검증한다
+
+#### 익셉션 관련 검증 메서드
+
+익셉션 발생 여부를 검증하고 싶다면 `assertThatThrownBy()` 메서드를 사용한다
+
+```java
+assertThatThrownBy(() -> readFile(new File("nofile.txt")));
+```
+
+`assertThatThrownBy()` 메서드는 인자로 받은 람다에서 익셉션이 발생하는지 검증한다  
+발생한 익셉션의 타입을 추가로 검증하고 싶다면 `isInstanceOf()` 메서드를 사용한다
+
+
+```java
+assertThatThrownBy(() -> readFile(new File("nofile.txt"))).isInstanceOf(IOException.class);
+```
+
+특정 타입의 익셉션이 발생하는지 검증하는 또다른 방법은 `assertThatExceptionOfType()` 메서드를 사용하는 것이다
+
+```java
+assertThatExceptionOfType(IOException.class)
+        .isThrownBy(() -> {
+            readFile(new File("nofile.txct"));
+        })
+```
+
+`assertThatExceptionOfType()`은 발생할 익셉션의 타입을 지정하고 `isThrownBy()` 메서드를 이용해서 익셉션이 발생할 코드 블록을 지정한다
+
+**IOException**이 발생하는 것을 검증할 경우에는 `assertThatIOException()` 메서드를 사용해도 된다
+
+```java
+assertThatIOException()
+        .isThrownBy(() -> {
+            readFile(new File("nofile.txct"));
+        })
+```
+
+`assertThatIOException()` 메서드 외에 `assertThatNullPointerException()`, `assertThatIllegalArgumentException()`, `assertThatIllegalStateException()` 메서드를 제공한다
+
+익셉션이 발생하지 않는 것을 검증할 수도 있다
+
+```java
+assertThatCode(() -> {
+    readFile(new File("pom.xml"));
+}).doesNotThrowAnyException();
+```
+
+#### SoftAssertions로 모아서 검증하기
+
+`org.assertj.core.api.SoftAssertions`는 JUnit 5의 `assertAll()`과 유사하다  
+여러 검증을 한 번에 수행하고 싶을 떄 **SoftAssertions**를 사용한다
+
+```java
+SoftAssertions soft = new SoftAssertions();
+soft.assertThat(1).isBetween(0, 2);
+soft.assertThat(1).isGreaterThan(2);
+soft.assertThat(1).isLessThan(0);
+soft.assertAll();
+```
+
+**SoftAssertions** 객체가 제공하는 `assertThat()` 메서드는 해당 시접에 바로 검증을 수행하지 않는다  
+두 번째 `assertThat()` 메서드는 1이 2보다 큰지 검증하는 코드이므로 검증을 통과할 수 없는데 이 코드를 실행하는 시점에는 검증 실패가 발생하지 않는다
+
+실제 검증은 `assertAll()` 메서드를 실행할 때 진행한다. `assertAll()`의 검증 결과는 다음과 같다
+
+```
+java.lang.AssertionError:
+Expecting:
+<1>
+to be greater than:
+<2>
+as SoftAssertionsTest.softly(SoftAssertionsTest.java:11)
+...생략
+
+java.lang.AssertionError:
+Expecting:
+<1>
+to be elss than:
+<0>
+as SoftAssertionsTest.softly(SoftAssertionsTest.java:12)
+...생략
+
+org.pentest4j.MultipleFailuresError: Multiple Failures (2 failures)
+
+Expecting:
+<1>
+to be greater than:
+<2>
+as SoftAssertionsTest.softly(SoftAssertionsTest.java:11)
+
+Expecting:
+<1>
+to be elss than:
+<0>
+as SoftAssertionsTest.softly(SoftAssertionsTest.java:12)
+```
+
+실행 결과를 보면 **SoftAssertions**가 검증하는 대상 중에서 두 개가 검증에 실패했다는 내용을 보여주며 각 실패 대상의 위치를 알려준다
+
+`SoftAssertions.assertSoftly()` 정적 메서드를 사용해도 된다. 이 메서드를 사용하면 다음 코드 처럼 `assertAll()` 메서드를 직접 호출하지 않아도 된다
+
+```java
+SoftAssertions.assertSoftly(soft -> {
+    soft.assertThat(1).isBetween(0, 2);
+    soft.assertThat(1).isGreaterThan(2);
+    soft.assertThat(1).isLessThan(0);
+});
+```
+
+#### `as()`와 `describedAs()`로 설명 달기
+
+`as()` 메서드는 테스트에 설명을 붙인다
+
+```java
+assertThat(id).as("ID 검사").isEqualTo("abc");
+```
+
+위 코드는 검증에 실패하면 다음의 실패 메시지를 출력한다
+
+```
+org.opentest4j.AssertionFailedError: [ID 검사]
+Expecting:
+<"bcd">
+to be equal to:
+<"abc">
+but was not.
+Expected :abc
+Actual :bcd
+```
+
+`as()` 메서드로 지정한 설명 문구가 실패 메시지에 표시되는 것을 확인할 수 있따
+
+`as()` 메서드에는 문자열 포맷을 사용할 수 있다  
+이때 첫 번째 인자는 포맷팅을 포함한 문자열이고 두 번째 인자부터는 포맷팅에 사용할 값을 전달한다
+
+```java
+assertThat(id).as("ID 검사: %s", "abc").isEqualTo("abc");
+```
+
+이 테스트 코드가 검증에 실패하면 설명 문구로 "[ID 검사: abc]"를 사용한다
+
+한 테스트 메서드에서 다수의 검증 메서드를 실행할 때 `as()`를 유용하게 사용할 수 있다
+
+```java
+List<Integer> ret = getResults();
+
+List<Integer> expected = Arrays.asList(1, 2, 3);
+SoftAssertions soft = new SoftAssertions();
+for (int i = 0; i < expected.size(); i++) {
+    soft.assertThat(ret.get(i)).as("ret[%d]", i).isEqualTo(expected.get(i));
+}
+soft.assertAll();
+```
+
+위 코드에서 검증에 실패하는 단언이 있으면 그 결과는 다음과 같이 표시된다
+
+```
+[ret[1]]
+Expecting:
+<6>
+to be equal to:
+<2>
+but was not.
+```
+
+"[ret[1]]"이 있으므로 몇 번째 값이 검증에 실패했는지 쉽게 알 수 있다
+
+만약 `as()`로 테스트에 설명을 붙이지 않으면 다음과 같이 비교할 값만 표시된다
+
+```
+Expecting:
+<6>
+to be equal to:
+<2>
+but was not.
+```
+
+`for` 구문 내에서 테스트에 실패했기 때문에 실패한 줄 번호로 이동해도 몇 번째 값이 실패한 것인지 알려면 나머지 코드를 더 뒤져봐야 한다
+
+`as()` 메서드 대신에 `describedAs()` 메서드를 사용해도 된다
