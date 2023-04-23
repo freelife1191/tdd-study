@@ -10,14 +10,14 @@
 - [X] Chapter 5. Junit 5 기초
 - [X] Chapter 6. 테스트 코드의 구성
 - [X] Chapter 7. 대역
-- [ ] Chapter 8. 테스트 가능한 설계
-- [ ] Chapter 9. 테스트 범위와 종류
-- [ ] Chapter 10. 테스트 코드와 유지 보수
-- [ ] Chapter 11. 마치며
-- [ ] 부록 A. Junit 5 추가 내용
-- [ ] 부록 B. Junit 4 기초
-- [ ] 부록 C. Mockito 기초 사용법
-- [ ] 부록 D. AssertJ 소개
+- [X] Chapter 8. 테스트 가능한 설계
+- [X] Chapter 9. 테스트 범위와 종류
+- [X] Chapter 10. 테스트 코드와 유지 보수
+- [X] Chapter 11. 마치며
+- [X] 부록 A. Junit 5 추가 내용
+- [X] 부록 B. Junit 4 기초
+- [X] 부록 C. Mockito 기초 사용법
+- [X] 부록 D. AssertJ 소개
 
 
 ---
